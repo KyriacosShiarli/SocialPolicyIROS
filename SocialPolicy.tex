@@ -93,7 +93,7 @@ To achieve this however, LfD would needs to surpass a few challenges of its own.
 
 Another challenge that is especially relevant in social robotics is the robustness of the robot's perception, due to the highly unstructured nature of the environment and limitations in the sensors. Noisy perception can greatly confuse LfD methods if those are not designed to be robust to it. As an example consider a social robot that is supposed to follow a person in a relatively crowded space. The robot must maintain the belief about the identity of the person it is following, furthermore it should be robust to false positive people detections within the environment. Failure to do so would result in the robot 'misunderstaning' what the demonstrations wanted to show.
 
- Recent advancements in Deep Learning allow computers and robots to perform many learning tasks with a single neural network architecture [atari],[sensimotor]. In addition certain methods within the field have shown robustness to noisy time-dependent inputs allowing the machine to learn many aspects of the environment that previous methods would assume a hand coded model for. For example the system might learn to ignore sensor readings or detections with certain characteristics if that is found to degrade the performance of the system. In this paper we employ a Deep Learning architecture to learn two simple low level behaviors for a holonomic telepresence Robot from demonstration. The first behaviour has to do with reconfiguration of the robot when interacting with a group. Taking that is, the correct body pose in the presence of a group of people of changing size and position. The second behaviour is following two people in abitrary formation. The rest of the paper is organised as follows. Section 2 describes the behaviours we wish to learn, summarises related work in the field and describes the experiments performed to collect the required data. Section 3 explains the challenges inherent in the tasks and the collected data. Through these challenges we explain the design choices for our neural network architecture. Section 4 describes quantitative and qualitative evaluation of our system against baselines. We remove different aspects of our architecture to show that all aspects are important. Furthermore we benchmark our method against a Gradient Boosting Regression baseline. Section 5 concludes the paper and details our plans for further work.
+ Recent advancements in Deep Learning allow computers and robots to perform many learning tasks with a single neural network architecture [atari],[sensimotor]. In addition certain methods within the field have shown robustness to noisy time-dependent inputs allowing the machine to learn many aspects of the environment that previous methods would assume a hand coded model for. For example the system might learn to ignore sensor readings or detections with certain characteristics if that is found to degrade the performance of the system. In this paper we employ a Deep Learning architecture to learn two simple low level behaviors for a holonomic telepresence Robot from demonstration. The first behaviour has to do with reconfiguration of the robot when interacting with a group. Taking that is, the correct body pose in the presence of a group of people of changing size and position. The second behaviour is following two people in abitrary formation. The rest of the paper is organised as follows. Section 2 describes the behaviours we wish to learn, summarises related work in the field and describes the experiments performed to collect the required data. Section 3 explains the challenges inherent in the tasks and the collected data. Through these challenges we explain the design choices for our neural network architecture. Section 4 describes quantitative and qualitative evaluation of our system against baselines. Section 5 concludes the paper and details our plans for further work.
 
 \section{Problem Statement \label{sec:related_work}}
 
@@ -149,7 +149,7 @@ Another crucial issue that we would like to address is that in many cases, even 
 
 To collect that data required for learning we have performed one set of experiments for each of the tasks described above. Every experimental session consisted of two experimenters, one or more volunteers from the University of Amsterdam and a TERESA\footnote{www.teresaproject.eu} intelligent telepresence system, shown in Figure \ref{fig:robot}.  One experimenter would act as the pilot while the other would be on the other side of the interaction and would have two roles. The first role would be to act as an interaction target. The second would be to instruct the volunteers to join or leave the interaction and attempt to change the shape of the interaction group (triggering an appropriate reaction from the pilot) in order to capture sufficient variability in the data.  
 
-During these interactions, we record the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot. The primary interaction target is defined as the most important person in the interaction and it is defined by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho_1},\dot{\phi_1},1),... (\rho_{K_t},\phi_{K_t},\dot{\rho_{K_t}},\dot{\phi_{K_t}},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{rho_k}$ and $\dot{\phi_k}$ represent the associated velocities. This is shown in Figure \ref{fig:data}. We in addition recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which amounts to the control rate we would use for the robot.  It is also worth noting that these interactions took place in different environments each containing different amounts of people and different sources of false possitives for the people detection modules.
+During these interactions, we record the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot. The primary interaction target is defined as the most important person in the interaction and it is defined by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_,\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{rho_k}$ and $\dot{\phi_k}$ represent the associated velocities. This is shown in Figure \ref{fig:data}. We in addition recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which amounts to the control rate we would use for the robot.  It is also worth noting that these interactions took place in different environments each containing different amounts of people and different sources of false possitives for the people detection modules.
 
   	\begin{figure}[tbh]
 	\centering
@@ -182,16 +182,16 @@ There are several ways perform LfD in robots that have been studied extensively 
 
 Our choice of algorithm for learning the mapping function in this case is a Neural Network for two reasons. The first of these is \emph{generality}. In these paper our aim is to learn two (and potentially more) behaviours using a single algortithm. NNs can learn the features that are important for prediction automatically and this in turn means there would be therefore no need to define problem-specific features for a task, such as for example a group detection module. The second reason to use NNs is \emph{modularity}. This means that we can use different computation modules depending on our high level application. For example through recurrent neural networks we can easily deal with observations that vary (non linearly) over time in order to alleviate problems arising from noise in detections. Also in our input representation we have continuous as well as discrete variables, neural networks can deal with such representations easily. Finally, we are in this case outputing two values ($v,\omega$) and common supervised learning algorithms would treat each output independantly. This is ofcourse possible with methods other than neural networks, such as Gaussian Mixture Models (GMMs) or Hidden Markov Models (HMM), which would however require feature engineering to perform well.  
 
-\subsection{Inputs and convolutional layers}
+\subsection{Inputs and convolutional layers \label{subsec:meth_inp}}
 In the previous section we have seen that our observations at time t can be formulated as:
 
 \begin{equation}
- 	o_t = \{(\rho_1,\phi_1,1), (\rho_2,\phi_2,0),(\rho_3,\phi_3,0) ... (\rho_{K_t},\phi_{K_t},0)\}_t
+ 	o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_{K_t},\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t
 \end{equation}
 An important aspect of our observations is that the amount of people around the robot is dependent on time. This means that the size of our input vector would vary with time depending on the value of $K_t$. This is not very friendly for most learning algorithms that would expect a fixed input vector size. One way to alleviate this problem would be to fix $K$ to some number we consider reasonable. If the amount of people in the data is more than $K$ we would keep the $K$ closest. If the amount is smaller than $K$ we would simply fill the first $K$ positions of the vector and leave the last one with zeros. In this case however we are suggesting to the algorithm that there is a person on the robot since $\rho,\theta = (0,0)$. This could have adverse effects on learning, we could thus add another binary feature to our observation vector, to indicate wether the detection is a valid one. The new observation vector would thus look something like:
 
 \begin{equation}
- 	o_t = \{(\rho_1,\phi_1,1,1), (\rho_2,\phi_2,0,1),(\rho_3,\phi_3,0,1) ... (\rho_{K},\phi_{K},0,0)\}_t.
+ 	o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1,1),... (\rho_{K_t},\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0,0)\}_t
 \end{equation}
 Although perhaps inconvienient the above notation would give the learning algorithm all the information to learn a mapping. 
 
@@ -214,12 +214,138 @@ Long-short term memory is a de-facto standard way of dealing with time depdenden
 
 
 
-\subsection{Outputs and Loss Functions}
-After processing by the recurrent layers the architecture then outputs two real continuous values representing the linear and angular velocities of the robot. Another solution would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits allowing us to predict multimodal output distributions, we chose regression for two reasons. First, there is no requirement to define the discretisation for each task allowing the architecture to remain more general, second continuous outputs bring about potentialy smoother behaviour. In order to train our network we use the mean squared error (MSE) between the network's prediction and the data and train using backprogapation using the Adam[] optimisation routine. The resulting architecture can be seen in Figure []. We employ three convolutional layers consisting of 15 5x5 filters at each layer. We use ReLU non-linearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 400 and 200 respectively. Finally a densely connected layer is used to output the two required control values. 
+\subsection{Outputs and Overall Architecture}
+After processing by the recurrent layers the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. Another solution would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits allowing us to predict multimodal output distributions, we chose regression for two reasons. First, there is no requirement to define the discretisation for each task allowing the architecture to remain more general, second continuous outputs bring about potentialy smoother behaviour. In order to train our network we use the mean squared error (MSE) between the network's prediction and the data and train using backprogapation using the Adam[] optimisation routine. The resulting architecture can be seen in Figure []. We employ three convolutional layers consisting of 15 5x5 filters at each layer. We use ReLU non-linearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 400 and 100 respectively. Finally a densely connected layer is used to output the two required control values. 
+
+While using three convolutional layers might seem exagerated we found that the number of layers and filters at each layer were crucial for stability when the policy was deployed on the robot. A common symptom of lack of depth would be that the controller would overshoot in terms of angular velocity leading to oscilatory behaviour. 
+
+A final crucial point is that prediction needs to happen at 10Hz on a conventional computer, such as the one used by our robot. The proposed architecture would run comfortably on an Intel i7 processor at the required control rate.
 
 
 \subsection{Continuous Learning Pipeline}
 One major setback of behavioural cloning that has been studied in the literature, is that since most demonstrations are noisy examples of what the robot should do, the robot never learns how to get out of difficult situations when it finds itself in one, because it was never encountered in the data. For this reason we take a similar approach to the one encountered in []. First we collect some data using the robot, perform learning and deploy the learned policy on the robot. During execution we correct the robot whenever it makes a mistake, record the data from the intervention and then hand the control back to the robot.
+
+
+\section{Evaluation and results}
+In order to evaluate our proposed architecture we will compare it against three other learning baselines. The first of these is an off-the-shelf regression method. In this case due to the mixed types in the inputs we will use Gradient Boosting Regression (GBR), which along with other ensemble methods is considered one of the best off the shelf algorithms for non-linear regression. We use this baseline to show that for traditional regression methods to work well task specific feature engineering would need to be performed. Input to this baseline are the concatenated observation vectors for K people around the robot (as described in the begining of Section \ref{subsec:meth_inp}) for T timesteps. In this case K=4 and T =5 so theinput vector representations is $K\times T \times 6 = 120$. We did not use T=20 as in our method since the explosion in input space caused a degradation in performance. The second baseline we use is an architecture that omits the convolutional layers and only employes the LSTM layers. The input representation is a vector concatenating the features of K people around the robot where K in this case is set to 4. Our third baseline is an architecture with a very small memory. This baseline has the same input representation input as the original one but with an effective memory of 0.2 seconds instead of 2 seconds.
+
+To measure performance we are not simply concerned about how well the algorithms fit the data but also how they perform when placed on the robot and tested with humans. Therefore to evaluate we use a mixture of quantitative and qualitative metrics. 
+
+\subsection{Mean squared error}
+
+\begin{table}[]
+\centering
+\caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.} \label{tab:}
+\label{my-label}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+       & GBR  & LSTM & Short & Full Model \\ \hline
+Group  & 0.01 & 0.01 & 0.01  & 0.02       \\ \hline
+Follow & 0.01 & 0.01 & 0.01  & 0.01       \\ \hline
+\end{tabular}
+
+\end{table}
+
+
+
+\subsection{Output distribution}
+A more qualitative yet insightful means of evaluation can be achieved by examining the output distribution on the outputs of each learned policy given the inputs. That is, using a portion of the validation data we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $v_{dem},\omega_{dem}$. This gives an idea as to how the output disribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since there is no one-to-one mapping between and output distribution and the MSE metric. Figures ?? overlay the $v_{dem},\omega_{dem}$ (blue) with $v_{pred},\omega_{pred}$ for our method and the baselines for the two tasks. We can see that in general GBR and Short perform very badly in capturing this distibution while LSTM and Full performed better as also suggested by the MSE metric. We can see however that the way LSTM chooses to fit the distribution looks more overfitted. This can se infered by...
+
+  	\begin{figure}[tbh]
+      \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{Full Model}
+    \label{fig:data}
+  \end{subfigure}
+    	\hspace{4mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{LSTM}
+       \label{fig:robot}
+  \end{subfigure} 
+  \\
+        \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{Short}
+    \label{fig:data}
+  \end{subfigure}
+  \hspace{4mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[scale = 0.22]{images/data.png}
+
+    \caption{GBR}
+       \label{fig:robot}
+  \end{subfigure} 
+  %\vspace{-3mm}
+  \caption{Output disributions of Group reconfiguration data (blue) and learned policies other colour.}
+
+    \vspace{-2mm}
+  \label{fig:data_robot}
+  \end{figure}
+
+
+  	\begin{figure}[tbh]
+      \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{Full Model}
+    \label{fig:data}
+  \end{subfigure}
+    	\hspace{4mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{LSTM}
+       \label{fig:robot}
+  \end{subfigure} 
+  \\
+        \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[scale = 0.22]{images/data.png}
+    \caption{Short}
+    \label{fig:data}
+  \end{subfigure}
+  \hspace{4mm}
+  \begin{subfigure}[b]{0.45\columnwidth}
+    \includegraphics[scale = 0.22]{images/data.png}
+
+    \caption{GBR}
+       \label{fig:robot}
+  \end{subfigure} 
+  %\vspace{-3mm}
+  \caption{Output disributions of Follow data (blue) and learned policies other colour.}
+
+    \vspace{-2mm}
+  \label{fig:data_robot}
+  \end{figure}
+
+
+\subsection{Human evaluation}
+This paper is a contribution to making social robotic behaviours easier to program. The end product of such an effort must then be evaluated by humans. Also unless a policy is deployed on an actual robot there is little way of knowing how it performs. This is because while the problem is tackled from a supervised leanring perspective it is still a sequential decision making problem. This means that an action of the robot affects its environment and wrong actions at the wrong time might cause unstable behaviour such as overshooting. 
+
+Our human evaluation in this case consisted of groups of subjects from the University of Amsterdam interacting with the learned policies. The subjects were first briefed about the purpose of each behaviour they were about to evaluate and given a questionaire about that behaviour. Two simple questions were posed:
+\begin{itemize}
+	\item How would you rate the behavior of the robot from 1 to 10.
+	\item Which of the policies did you prefer.
+\end{itemize}
+Then they were allowed to interact with each policy for 2 minutes. The policies were given at random order for each group and each task. 
+
+\begin{table}[]
+\centering
+\caption{Human evaluation for different controllers. The score represents the average score (out of 10) given to the policies by the subjects. The votes represent how many of the subject voted for the specific policy as the best.}
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+                &       & \textbf{Hard Coded} & \textbf{LSTM} & \textbf{Short} & \textbf{Full Model} \\ \hline
+\textbf{Group}  & Score & 8                   & 4             & 4              & 10                  \\ \hline
+                & Votes & 5                   & 0             & 0              & 7                   \\ \hline
+\textbf{Follow} & Score & 8                   & 4             & 4              & 10                  \\ \hline
+                & Votes & 5                   & 0             & 0              & 7                   \\ \hline
+\end{tabular}
+\end{table}
+
+\section{Conclusions and future work} 
 
 % 	In this section, we propose Rapidly Exploring Learning Trees (RLT$^*$).  We first propose a generic extension to MMP that we call Approximate Maximum Margin Planning.  We then show how an implementation of this approach with an RRT$^*$ planner and a novel caching scheme yields RLT$^*$.
 
