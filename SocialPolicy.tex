@@ -123,25 +123,25 @@ In this paper, we consider two social tasks for a telepresence robot.  Such a ro
 
 In the first task, the robot must maintain a socially appropriate position, orientation, and body pose \sw{we need to say what body poses are, and more specially describe all the actuation available to the robot} as the location, position, and size of the group with which the pilot is interacting changes.  To do so, the robot must distinguish between people who are in the scene but not part of the conversation. Though this task, shown diagrammatically in Figure \ref{fig:static}, looks deceptively simple, manually coding such behaviour, or even deciding on what features such behaviour should condition, is quite difficult in practice, making it an ideal application for LfD.
 
-The task of repositioning a robot following a change in a conversation group's size and shape has been tackled previously by \cite{kuzuoka2010reconfiguring} and \cite{vroon2015dynamics}. In both pieces of work what is investigated are the effects that a robot's behaviour has on people. In our case we automate such a behaviour using LfD methods.  There is furthermore some work on detecting groups of people in crowded environments \cite{lau2010multi} and then building systems that interact with them. In our work the notion of a group is never explicitly defined. Since we are learning a mapping from detections to output actions. This important to maintain the algorithms ability to learn a variety of taks, but could potentially increase the amount of data needed for learning.
+Previous work as considered what effect robot repositioning following a change in a conversation group's size and shape has on the people in that group \cite{kuzuoka2010reconfiguring,vroon2015dynamics}. Here, we consider how to automate such repositioning using LfD.  Other work considers how to detect groups of people in crowded environments \cite{lau2010multi} and then interact with them.  In our approach, groups are not explicitly detected, though the learned control policy may implicitly do so when deciding how to act.
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
 	\centering
       \begin{subfigure}[b]{0.39\columnwidth}
     \includegraphics[scale = 0.15]{images/static.png}
-    \caption{Group reconfiguration}
+    \caption{Group Reconfiguration}
     \label{fig:static}
   \end{subfigure}
   \hspace{10mm}
   \begin{subfigure}[b]{0.39\columnwidth}
   \hspace{4mm}
     \includegraphics[scale = 0.15]{images/follow.png}
-    \caption{Follow}
+    \caption{Following}
     \label{fig:follow}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{(a) The group reconfiguration behavior. Arrows show possible decisions by the robot.  (b) Follow behavior. Arrows show the motion of the robot and the people in the scene.}
+  \caption{The two tasks we consider, with arrows showing possible motion of the robot and people.  \sw{This figure is confusing because the arrows mean different things in the two parts, and they are the same except for the arrows so it doesn't really capture the differences.}}
 
     \vspace{-2mm}
 
@@ -149,7 +149,9 @@ The task of repositioning a robot following a change in a conversation group's s
   \label{fig:behaviors}
   \end{figure}
 
-\paragraph{Following bahavior} Here the interaction target(s) are moving and the robot should follow them. The robot should be able to deal with relative variability in the formation of the people it is following. Furthermore it should be robust to false positive detections and be able to retain a following behaviour despite other people that are detected during the task but not relevant to it. This task is shown diagrammatically in Figure \ref{fig:follow}. Following behaviors can be challenging as the sensors might suffer from reliability issues as velocities increase \cite{kobilarov2006people}.
+\subsection{Following Task} 
+
+Here the interaction target(s) are moving and the robot should follow them. The robot should be able to deal with relative variability in the formation of the people it is following. Furthermore it should be robust to false positive detections and be able to retain a following behaviour despite other people that are detected during the task but not relevant to it. This task is shown diagrammatically in Figure \ref{fig:follow}. Following behaviors can be challenging as the sensors might suffer from reliability issues as velocities increase \cite{kobilarov2006people}.
 
 Our second task of having the robot robustly follow people has also been popular among robotisists. A recent method described in \cite{ferrer2016robot} uses an extended social force model enriched with a goal prediction module in order to allow to walk side by side with a person. Furthermore, the system tests different social forces parameters and allows the user to give feedback about the experience. Based on this feedback the robot learns to adapt itself to the specific person.  Our work investigates the possibility of bypassing such models and simply learn the required behavior robustly through data.  
 
