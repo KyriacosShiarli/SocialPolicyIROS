@@ -26,6 +26,8 @@
 \usepackage{amssymb}
 \DeclareMathOperator*{\argmin}{\arg\!\min} 
 \DeclareMathOperator*{\argmax}{\arg\!\max} 
+\usepackage[normalem]{ulem}
+\useunder{\uline}{\ul}{}
 
 % \title{\LARGE \bf
 % Rapidly Exploring Learning Trees
@@ -250,19 +252,32 @@ To measure performance we are not simply concerned about how well the algorithms
 
 \subsection{Mean squared error}
 
+% \begin{table}[]
+% \centering
+% \caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.} \label{tab:}
+% \label{my-label}
+% \begin{tabular}{|l|l|l|l|l|}
+% \hline
+%        & GBR  & LSTM & Short & DBSoC \\ \hline
+% Group  & 0.1 & 0.015 & 0.0126  & \textbf{0.0084}       \\ \hline
+% Follow & 0.1 & 0.0063 & 0.0149  & \textbf{0.0055}       \\ \hline
+% \end{tabular}
+
+% \end{table}
+
 \begin{table}[]
 \centering
-\caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.} \label{tab:}
-\label{my-label}
-\begin{tabular}{|l|l|l|l|l|}
+\caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.}
+\label{tab:mse}
+\begin{tabular}{|c|c|c|c|l|c|}
 \hline
-       & GBR  & LSTM & Short & Full Model \\ \hline
-Group  & 0.01 & 0.01 & 0.01  & 0.02       \\ \hline
-Follow & 0.01 & 0.01 & 0.01  & 0.01       \\ \hline
+                &             & {\ul LSTM} & {\ul Short} & {\ul GBR} & {\ul Full Model} \\ \hline
+\textbf{Group}  & {\ul Train} & 0.0072     & 0.0039      & 0.022     & \textbf{0.0021}  \\ \hline
+                & {\ul Test}  & 0.0088     & 0.0099      & 0.0261    & \textbf{0.0036}  \\ \hline
+\textbf{Follow} & {\ul Train} & 0.0029     & 0.0047      & 0.026     & \textbf{0.0031}  \\ \hline
+                & {\ul Test}  & 0.0038     & 0.012       & 0.0030    & \textbf{0.0034}  \\ \hline
 \end{tabular}
-
 \end{table}
-
 
 
 \subsection{Output distribution}
@@ -310,7 +325,7 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
     \caption{Full Model}
     \label{fig:data}
   \end{subfigure}
-    	\hspace{4mm}
+    	\hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
 
     \includegraphics[scale = 0.10]{images/lstm_dist.png}
@@ -323,7 +338,7 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
     \caption{Short}
     \label{fig:data}
   \end{subfigure}
-  \hspace{4mm}
+  \hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
     \includegraphics[scale = 0.10]{images/gbr_dist.png}
 
@@ -331,7 +346,7 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
        \label{fig:robot}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{Output disributions of Follow data (blue) and learned policies other colour.}
+  \caption{Output disributions of Follow data (red) and learned policies.}
 
     \vspace{-2mm}
   \label{fig:data_robot}
