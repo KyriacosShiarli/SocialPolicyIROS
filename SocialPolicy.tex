@@ -159,7 +159,7 @@ Our second task of having the robot robustly follow people has also been popular
 
 Knox et al \cite{knox2013training} train a robot to perform several tasks that are similar to ours, such as maintaining a conversational distance and "magnetic control". However training is done using human generated reward and reinforcement learning through the TAMER framework \cite{knox2009interactively}. Furthermore, the tasks only consider a single person in the scene and perfect sensing, our work contains no such assumptions.
 
-It is interesting to note that none of the work above employs Learning from Demonstration to learn how a robot should behave socially. LfD seems to be instead most commonly used for complex manipulation tasks \cite{argall2009survey} where the field is indeed very active. And more recently along with deep learning in self-driving cars, with very promising results. In terms of social robot behavior LfD is mostly used for learning high level behaviours []. Our work fills this gap, by learning low level control of a social robot from demonstrations.
+It is interesting to note that none of the work above employs Learning from Demonstration to learn how a robot should behave socially. LfD seems to be instead most commonly used for complex manipulation tasks \cite{argall2009survey} where the field is indeed very active. And more recently along with deep learning in self-driving cars, with very promising results. In terms of social robot behavior LfD is mostly used for learning high level behaviours \cite{louie2016learning} \cite{lockerd2004tutelage}. Our work fills this gap, by learning low level control of a social robot from demonstrations.
 
 Another crucial issue that we would like to address is that in many cases, even though the environment around the robot changes, there should be no change in the behavior of the robot. This \emph{invariance} is very hard to hard code. For example if we were to use a social force model to solve the tasks, the calculated forces would vary all the time based on the people position. This in turn means that the behavior of the robot could become either over or under sensitive depending on tuning. By learning these behaviors from demonstrations we hope that the robot will not only learn what to do and how to do it, but also when to do it.
 
@@ -265,7 +265,7 @@ One major setback of behavioural cloning that has been studied in the literature
 
 
 \section{Evaluation and results}
-In order to evaluate our proposed architecture we will compare it against three other learning baselines. The first of these is an off-the-shelf regression method. In this case due to the mixed types in the inputs we will use Gradient Boosting Regression (GBR), which along with other ensemble methods is considered one of the best off the shelf algorithms for non-linear regression. We use this baseline to show that for traditional regression methods to work well task specific feature engineering would need to be performed. Input to this baseline are the concatenated observation vectors for K people around the robot (as described in the begining of Section \ref{subsec:meth_inp}) for T timesteps. In this case K=4 and T =5 so theinput vector representations is $K\times T \times 6 = 120$. We did not use T=20 as in our method since the explosion in input space caused a degradation in performance. The second baseline we use is an architecture that omits the convolutional layers and only employes the LSTM layers. The input representation is a vector concatenating the features of K people around the robot where K in this case is set to 4. Our third baseline is an architecture with a very small memory. This baseline has the same input representation input as the original one but with no memory of past inputs.
+In order to evaluate our proposed architecture we will compare it against three other learning baselines. The first of these is an off-the-shelf regression method. In this case due to the mixed types in the inputs we will use Gradient Boosting Regression (GBR), which along with other ensemble methods is considered one of the best off the shelf algorithms for non-linear regression. We use this baseline to show that for traditional regression methods to work well task specific feature engineering would need to be performed. Input to this baseline are the concatenated observation vectors for K people around the robot (as described in the begining of Section \ref{subsec:meth_inp}) for T timesteps. In this case K=4 and T =5 so theinput vector representations is $K\times T \times 6 = 120$. We did not use T=20 as in our method since the explosion in input space caused a degradation in performance. The second baseline we use is an architecture that omits the convolutional layers and only employs the LSTM layers. The input representation is a vector concatenating the features of K people around the robot where K in this case is set to 4. Our third baseline is an architecture with no memory and only uses the convolutional layers.
 
 To measure performance we are not simply concerned about how well the algorithms fit the data but also how they perform when placed on the robot and tested with humans. Therefore to evaluate we use a mixture of quantitative and qualitative metrics. 
 
@@ -291,76 +291,43 @@ As mentioned in the previous section, the objective function used to learn the m
 \label{tab:mse}
 \begin{tabular}{|c|c|c|c|l|c|}
 \hline
-                &             & {\ul LSTM} & {\ul Short} & {\ul GBR} & {\ul Full Model} \\ \hline
-\textbf{Group}  & {\ul Train} & 0.0072     & 0.0039      & 0.022     & \textbf{0.0021}  \\ \hline
-                & {\ul Test}  & 0.0088     & 0.0099      & 0.0261    & \textbf{0.0036}  \\ \hline
-\textbf{Follow} & {\ul Train} & 0.0029     & 0.0047      & 0.026     & \textbf{0.0031}  \\ \hline
-                & {\ul Test}  & 0.0038     & 0.012       & 0.0030    & \textbf{0.0034}  \\ \hline
+                &             & {\ul GBR} & {\ul LSTM} & {\ul CONV} & {\ul DBSoC} \\ \hline
+\textbf{Group}  & {\ul Train} & 0.0232     & 0.0098      & 0.0087     & \textbf{0.0018}  \\ \hline
+                & {\ul Test}  & 0.0264     & 0.0120      & 0.015    & \textbf{0.0031}  \\ \hline
+\textbf{Follow} & {\ul Train} & 0.0265    & 0.00334      & 0.0079     & \textbf{0.0030}  \\ \hline
+                & {\ul Test}  & 0.0323     & 0.00450       & 0.0250    & \textbf{0.0036}  \\ \hline
 \end{tabular}
 \end{table}
 
 
 \subsection{Output distribution}
-A more qualitative yet insightful means of evaluation can be achieved by examining the output distribution on the outputs of each learned policy given the inputs. That is, using a portion of the validation data we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $v_{dem},\omega_{dem}$. This gives an idea as to how the output disribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since it can give as an insight on the expected behaviour of the robot. Figures ?? overlays the $v_{dem},\omega_{dem}$ (blue) with $v_{pred},\omega_{pred}$ for our method and the baselines for the follow task. The most obvious observation is that GBR captures the demonstrated distribution very badly. Its behaviour is extected to not use large angular velocities (y-axis) and will thus be not very responsive. In addition there seems to be a lot of uncertainty around the origin, possibly leading to oscilatory behaviour between positive an negative velocities. The short memory architecture also seems unable to capture the distribution, we see a lot of points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
+A more qualitative yet insightful means of evaluation can be achieved by examining the output distribution on the outputs of each learned policy given the inputs. That is, using a portion of the validation data we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $v_{dem},\omega_{dem}$. This gives an idea as to how the output disribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since it can give as an insight on the expected behaviour of the robot. Figures \ref{fig:data} overlays the $v_{dem},\omega_{dem}$ (blue) with $v_{pred},\omega_{pred}$ for our method and the baselines for the follow task. The most obvious observation is that GBR captures the demonstrated distribution very badly. Its behaviour is extected to not use large angular velocities (y-axis) and will thus be not very responsive. In addition there seems to be a lot of uncertainty around the origin, possibly leading to oscilatory behaviour between positive an negative velocities. The short memory architecture also seems unable to capture the distribution, we see a lot of points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
 
-  % 	\begin{figure}[tbh]
-  %     \begin{subfigure}[b]{0.45\columnwidth}
-
-  %   \includegraphics[scale = 0.22]{images/data.png}
-  %   \caption{Full Model}
-  %   \label{fig:data}
-  % \end{subfigure}
-  %   	\hspace{4mm}
-  % \begin{subfigure}[b]{0.45\columnwidth}
-
-  %   \includegraphics[scale = 0.22]{images/data.png}
-  %   \caption{LSTM}
-  %      \label{fig:robot}
-  % \end{subfigure} 
-  % \\
-  %       \begin{subfigure}[b]{0.45\columnwidth}
-  %   \includegraphics[scale = 0.22]{images/data.png}
-  %   \caption{Short}
-  %   \label{fig:data}
-  % \end{subfigure}
-  % \hspace{4mm}
-  % \begin{subfigure}[b]{0.45\columnwidth}
-  %   \includegraphics[scale = 0.22]{images/data.png}
-
-  %   \caption{GBR}
-  %      \label{fig:robot}
-  % \end{subfigure} 
-  % %\vspace{-3mm}
-  % \caption{Output disributions of Group reconfiguration data (blue) and learned policies other colour.}
-
-  %   \vspace{-2mm}
-  % \label{fig:data_robot}
-  % \end{figure}
 
 
   	\begin{figure}[tbh]
       \begin{subfigure}[b]{0.45\columnwidth}
 
-    \includegraphics[scale = 0.10]{images/full_dist.png}
-    \caption{Full Model}
+    \includegraphics[scale = 0.09]{images/full_dist.png}
+    \caption{DBSoC}
     \label{fig:data}
   \end{subfigure}
     	\hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
 
-    \includegraphics[scale = 0.10]{images/lstm_dist.png}
+    \includegraphics[scale = 0.09]{images/lstm_dist.png}
     \caption{LSTM}
        \label{fig:robot}
   \end{subfigure} 
   \\
         \begin{subfigure}[b]{0.45\columnwidth}
-    \includegraphics[scale = 0.10]{images/short_dist.png}
-    \caption{Short}
+    \includegraphics[scale = 0.09]{images/short_dist.png}
+    \caption{CONV}
     \label{fig:data}
   \end{subfigure}
   \hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
-    \includegraphics[scale = 0.10]{images/gbr_dist.png}
+    \includegraphics[scale = 0.09]{images/gbr_dist.png}
 
     \caption{GBR}
        \label{fig:robot}
@@ -376,25 +343,30 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
 \subsection{Human evaluation}
 This paper is a contribution to making social robotic behaviours easier to program. The end product of such an effort must then be evaluated by humans. Also unless a policy is deployed on an actual robot there is little way of knowing how it performs. This is because while the problem is tackled from a supervised leanring perspective it is still a sequential decision making problem. This means that an action of the robot affects its environment and wrong actions at the wrong time might bring the robot to states it does not know how to recover from.
 
-Our human evaluation in this case consisted of groups of subjects from the University of Amsterdam interacting with the learned policies. The subjects were first briefed about the purpose of each behaviour they were about to evaluate (i.e., follow or group conversation). Following the briefing was a calibration step where the subjects were shown human level performance in each of the tasks as well as various policies at random. This allowed the subjects to get a feel as to what they should expect from the robot. After calibration the subjects were given about 2 minute to interact with each policy to be evaluated at each of the tasks. The policies were given anonymously and at different order each time. The subjects were then given the opportunity to rate the social performance of each policy with a number from 1 to 10, with 10 being human level performance. Examples of the interactions for different tasks and policies in such an evaluation session can be seen in the attached video.
+Our human evaluation in this case consisted of groups of subjects from the University of Amsterdam interacting with the learned policies as well as a hard-coded controller. This hard-coded behaviour would take the person closest to the person and attempt to keep a constant distance ($\rho$) of $1.3m$, in accordance with standard proxemics [hall], and an orientation ($\phi$) of $0^o$. The subjects were first briefed about the purpose of each behaviour they were about to evaluate (i.e., follow or group conversation). Following the briefing was a calibration step where the subjects were shown human level performance in each of the tasks as well as various policies at random. This allowed the subjects to get a feel as to what they should expect from the robot. After calibration the subjects were given about 2 minutes to interact with each policy to be evaluated at each of the tasks. The policies were given anonymously and at different order each time. The subjects were then given the opportunity to rate the social performance of each policy with a number from 1 to 10, with 10 being human level performance. Examples of the interactions for different tasks and policies in such an evaluation session can be seen in the attached video.
 
-Table \ref{tab:human} shows the mean scores and standard deviations for each policy in question. The first observation we make is that different methods perform quite differently depending on the task. We can see for example that the hard coded controller performs is percieved to perform very well for the follow behaviour, but not for group conversation. A common comment during this policy was that it would only concentrate on one person and would not adjust to the group. A perhaps more surprising result in that humans percieve GBR to be still a relavitely good policy on average but these ratings are noisy. This was because in general the behaviour would vary a lot depending on the situations that would arise in the interaction, the same observation applied for the 
+A summary of the scores for each policy in question are shown as box plots in Figure \ref{fig:human}. The first observation we make is that different methods perform quite differently depending on the task. We can see for example that the hard-coded controller is percieved to perform very well for the follow behaviour - due to its smoothness of control - whereas in the group interaction task the controller performs more poorly. A common comment was that it would only concentrate on one person and would not adjust to the group. A perhaps more surprising result in that humans percieve GBR to be still a relavitely good policy on average. These ratings are noisy however because the behaviour would vary a lot depending on the situations that would arise in the interaction. In therms of DBSoC, a key observation is that it performs quite well during all evaluations. This is apparent from the fact that during no evaluation did it recieve a lower score than 5 while most methods did. On the other hand it did not manage to perform as well as the hard-coded controller on the follow task. This was mainly because control was less smooth for DBSoC as for all other baselines that employed learning.
 
 During the course of these evaluations it became apparent how difficult it is for humans to evaluate social robotic behaviour. Perhaps a more detailed questionaire and more structured interaction scenarios would have been more appropriate to analyse the preferences of the subjects however this was not performed due to time constraints. Therefore while we do not consider these numbers to be hard evidence for the superior performance of our method they do support the generality and effectiveness of our approach. Furthermore, the fact that the subjects were allowed to interact freely with the robot suggest that results in Section are not a product of overfitting due to the nature of the collected data. 
 
-\begin{table}[]
-\centering
-\caption{Human evaluation for different controllers. The score represents the average score (out of 10) given to the policies by the subjects. The votes represent how many of the subject voted for the specific policy as the best.}
-\label{tab:human}
-\begin{tabular}{|c|c|c|c|c|c|}
-\hline
-                &       & \textbf{Hard Coded} & \textbf{LSTM} & \textbf{Short} & \textbf{Full Model} \\ \hline
-\textbf{Group}  & Score & 8                   & 4             & 4              & 10                  \\ \hline
-                & Votes & 5                   & 0             & 0              & 7                   \\ \hline
-\textbf{Follow} & Score & 8                   & 4             & 4              & 10                  \\ \hline
-                & Votes & 5                   & 0             & 0              & 7                   \\ \hline
-\end{tabular}
-\end{table}
+	\begin{figure}[tbh]
+      \begin{subfigure}[b]{0.40\columnwidth}
+    \includegraphics[scale = 0.30]{images/group_candle.png}
+    \caption{Group Reconfiguration}
+    \label{fig:static}
+  \end{subfigure}
+  \hspace{5mm}
+  \begin{subfigure}[b]{0.40\columnwidth}
+    \includegraphics[scale = 0.30]{images/follow_candle.png}
+    \caption{Following}
+    \label{fig:follow}
+  \end{subfigure} 
+  %\vspace{-3mm}
+  \caption{Box plots summarising human evaluation scores for all baselines on the two tasks.}
+  %\vspace{-3mm}
+  \label{fig:human}
+  \end{figure}
+
 
 \section{Conclusions and future work} 
 
