@@ -206,19 +206,18 @@ During these interactions, we recorded the positions and linear velocities of al
 
 \emph{Behavioural cloning} is a simple approach to LfD that treats the problem as one of supervised learning. The (sequences of) observations are viewed as inputs $s_t$ and actions $a_t$ as labels.  Then, any supervised learning paradigm (regression, classification) and algorithm (decision trees, gaussian processes, neural networks) \cite{bishop2006pattern} can be used to learn a mapping from $s_t$ to $a_t$, which then constitutes a control policy.  Compared to other forms of LfD such as \emph{inverse reinforcement learning} \cite{abbeel2004apprenticeship}, which extracts a cost function from the demonstrations that is subsequently used to plan (or learn \cite{boularias2011relative}) a policy, behavioural cloning is simple, practical, and does not require access to a model or the ability to try out candidate policies during learning. \sw{We need to crystallise exactly what the argument against IRL is.}
 
-DBSoC uses behavioural cloning with \emph{neural networks} (NNs).  Using NNs has two key advantages in this setting.  First, given the need for a generic algorithm that can tackle multiple tasks, NNs can learn features, e.g., that can detect if someone is part of a group, that can be reused across related tasks.  Second, NNs are modular, allowing us to swap in different modules depending on the high-level application. For example, we describe below how we use
-recurrent neural networks to deal with noisy perceptual input.
+DBSoC uses behavioural cloning with \emph{neural networks} (NNs).  Using NNs has two key advantages in this setting.  First, given the need for a generic algorithm that can tackle multiple tasks, NNs can learn features, e.g., that can detect if someone is part of a group, that can be reused across related tasks.  Second, NNs are modular, allowing us to swap in different modules depending on the high-level application. For example, we describe below how we use convolutional layers to cope with varying numbers of people and recurrent layers to deal with noisy perceptual input.
 
 %we can easily deal with observations that vary (non linearly) over time in order to alleviate problems arising from noise in detections. Also in our input representation we have continuous as well as discrete variables, neural networks can deal with such representations easily. 
 
 %Finally, we are in this case outputing two values ($v,\omega$) and common supervised learning algorithms would treat each output independantly. This is ofcourse possible with methods other than neural networks, such as Gaussian Mixture Models (GMMs) or Hidden Markov Models (HMM), which would however require feature engineering to perform well.  
 
-\subsection{Inputs and convolutional layers \label{subsec:meth_inp}}
-In the previous section we have seen that our observations at time t can be formulated as:
-
-\begin{equation}
- 	o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_{K_t},\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t
-\end{equation}
+\subsection{Inputs and Convolutional Layers \label{subsec:meth_inp}}
+%In the previous section we have seen that our observations at time t can be formulated as:
+%
+%\begin{equation}
+% 	o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_{K_t},\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t
+%\end{equation}
 An important aspect of our observations is that the amount of people around the robot is dependent on time. This means that the size of our input vector would vary with time depending on the value of $K_t$. This is not very friendly for most learning algorithms that would expect a fixed input vector size. One way to alleviate this problem would be to fix $K$ to some number we consider reasonable. If the amount of people in the data is more than $K$ we would keep the $K$ closest. If the amount is smaller than $K$ we would simply fill the first $K$ positions of the vector and leave the last one with zeros. In this case however we are suggesting to the algorithm that there is a person on the robot since $\rho,\theta = (0,0)$. This could have adverse effects on learning, we could thus add another binary feature to our observation vector, to indicate wether the detection is a valid one. The new observation vector would thus look something like:
 
 \begin{equation}
