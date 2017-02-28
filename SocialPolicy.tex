@@ -226,9 +226,7 @@ While this representation accurately describes the observation, it is not conven
 
 To avoid these difficulties, we instead imprint the information in the observation onto a 2D image. In particular, we fix a maximum distance $x_{max},y_{max}$ from the robot and `paint' all the people around the robot within that area on a ternary image, i.e., each pixel can have one of three values: $0=$ no person is present, $1=$ a person is present, $2=$ if a primary interaction target is present. We also denote the velocities of people as lines extending from the detections in the direction of the detected velocity and with a length correspomnding to its magnitude. Figure \ref{fig:state} shows an example of such an image.  It is straightforward to augment this representation with, e.g., people's orientations or the positions of non-human obstacles, should they be detectable.
 
-Although more convienient however this representation comes with a clear setback, which is that we are increasing the dimensionality of the problem. Usually when learning we seek to reduce the dimensionality of the problem through feature engineering, here we are in a sense doing the opposite. 
-
-To alleviate this setback we use convolutional neural networks (CNN) on this input representation. CNNs perform very well on spacially structured input such as the one at hand where although the actual dimentionality of the input is large, the possible images that can take place are limited and their features can be learned. CNNs are also very useful because they are able to build invariances. This is extremely helpful in this application because the network can learn to ignore some configurations of the input making learning more robust. Our analysis in the next section we show that in practice this representation along with CNNs is not only more convienient but also beneficial to learning and stability of the resulting behaviour.
+A potential downside of this approach, however, is a great increase in the dimensionality of our representation.  Fortunately, thanks to deep learning, it is feasible to cope with this dimensionality.  In particular, by applying \emph{convolutional neural networks} (CNNs) to this input representation, we can automatically extract high-level features from the raw pixel data in the image. CNNs perform very well on spatially structured input such images.  Although the  dimensionality of the input is large, the number of possible images is limited. CNNs are also  useful because they can build invariances. \sw{What is meant by invariances here?} This is extremely helpful in this application because the network can learn to ignore some configurations of the input, making learning more robust. \sw{Like what? This is too vague} Our results in the next section we show that in practice this representation together with CNNs is not only more convenient, but also improves learning and the stability of the resulting behaviour.
 
   	\begin{figure}[tbh]
   	\centering
@@ -245,7 +243,7 @@ To alleviate this setback we use convolutional neural networks (CNN) on this inp
        \label{fig:state3}
   \end{subfigure}
   %\vspace{-3mm}
-  \caption{Example images representing the state of the robot. Circles denote people, lines denote velocity. The white circle represents the primary interaction target.}
+  \caption{Example images representing the state of the robot. Circles denote people, lines denote velocity, and the white circle represents the primary interaction target.}
 
     \vspace{-2mm}
   \label{fig:state}
