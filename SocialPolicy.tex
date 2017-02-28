@@ -28,6 +28,7 @@
 \DeclareMathOperator*{\argmax}{\arg\!\max} 
 \usepackage[normalem]{ulem}
 \useunder{\uline}{\ul}{}
+\usepackage{url}
 
 % \title{\LARGE \bf
 % Rapidly Exploring Learning Trees
@@ -170,9 +171,9 @@ More generally, in social robotics settings, LfD is primarily used for learning 
 
 \subsection{Data and Experiments \label{subsec:data_exp}} 
 
-To collect that data required for learning, we performed one set of experiments for each of the tasks described above. Every experimental session involved two experimenters, one or more volunteers from the University of Amsterdam, and a TERESA\footnote{www.teresaproject.eu} intelligent telepresence system, shown in Figure \ref{fig:robot}.  One experimenter would act as the pilot while the other would be on the other side of the interaction and would have two roles. The first role would be to act as an interaction target. The second would be to instruct the volunteers to join or leave the interaction and attempt to change the shape of the interaction group (triggering an appropriate reaction from the pilot) in order to capture sufficient variability in the data.  
+To collect that data required for learning, we performed one set of experiments for each of the tasks described above. Every experimental session involved two experimenters, one or more volunteers from the University of Amsterdam, and a TERESA\footnote{\url{http://www.teresaproject.eu.}} intelligent telepresence system, shown in Figure \ref{fig:robot}.  One experimenter acted as the pilot while the other acted as an interaction target and also instructed the volunteers to join or leave the interaction and attempt to change the shape of the interaction group (triggering an appropriate reaction from the pilot) in order to generate sufficient variability in the data.  
 
-During these interactions, we record the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot. The primary interaction target is defined as the most important person in the interaction and it is defined by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_,\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{\rho}_k$ and $\dot{\phi}_k$ represent the associated velocities. This is shown in Figure \ref{fig:data}. We in addition recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which amounts to the control rate we would use for the robot.  It is also worth noting that these interactions took place in different environments each containing different amounts of people and different sources of false possitives for the people detection modules.
+During these interactions, we recorded the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot. The primary interaction target is defined as the most important person in the interaction and it is defined by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_,\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{\rho}_k$ and $\dot{\phi}_k$ represent the associated velocities. This is shown in Figure \ref{fig:data}. We in addition recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which amounts to the control rate we would use for the robot.  It is also worth noting that these interactions took place in different environments each containing different amounts of people and different sources of false possitives for the people detection modules.
 
   	\begin{figure}[tbh]
 	\centering
@@ -180,7 +181,7 @@ During these interactions, we record the positions and linear velocities of all 
           \includegraphics[scale = 0.15]{images/robot2.jpg}
 
     \caption{}
-    \label{fig:data}
+    \label{fig:robot}
   \end{subfigure}
 %  \hspace{2mm}
   \begin{subfigure}[b]{0.35\columnwidth}
@@ -189,7 +190,7 @@ During these interactions, we record the positions and linear velocities of all 
     \includegraphics[scale = 0.19]{images/data.png}
   \vspace{5mm}
     \caption{}
-       \label{fig:robot}
+       \label{fig:data}
   \end{subfigure} 
 
   \caption{(a) The TERESA telepresence robot used in our experiments; (b) the data collected for a single frame $(t)$ during our experiments.}
@@ -316,14 +317,14 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
 
     \includegraphics[scale = 0.09]{images/full_dist.png}
     \caption{DBSoC}
-    \label{fig:data}
+    \label{fig:data1}
   \end{subfigure}
     	\hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
 
     \includegraphics[scale = 0.09]{images/lstm_dist.png}
     \caption{LSTM}
-       \label{fig:robot}
+       \label{fig:data2}
   \end{subfigure} 
   \\
         \begin{subfigure}[b]{0.45\columnwidth}
@@ -336,13 +337,13 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
     \includegraphics[scale = 0.09]{images/gbr_dist.png}
 
     \caption{GBR}
-       \label{fig:robot}
+       \label{fig:data3}
   \end{subfigure} 
   %\vspace{-3mm}
   \caption{Output disributions of Follow data (red) and learned policies.}
 
     \vspace{-2mm}
-  \label{fig:data_robot}
+  \label{fig:data4}
   \end{figure}
 
 
