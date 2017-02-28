@@ -249,18 +249,16 @@ A potential downside of this approach, however, is a great increase in the dimen
   \label{fig:state}
   \end{figure}
 
-\subsection{Dynamics and long short term memory}
-Using a single observation as input to a convolutional neural network that outputs a control is unlikely to succesful for three main reasons.
+\subsection{Dynamics and Long Short-Term Memory}
+Using a single observation as input to a convolutional neural network that outputs a control signal is problematic for three reasons:
 
-\begin{itemize}
-\item A single observation instance $o_t$ does not contain higher order information such a the acceleration of people.
-\item The people detection module is not perfect. False positives and negatives are common within the data, not having context information from previous observations will affect robustness of the controller.
-\item The velocity information (albeit helpful) is innacurate and noisy.
-\end{itemize}
+\begin{enumerate}
+\item A single observation instance $o_t$ does not contain higher order information such as people's rate of  acceleration.
+\item The people detection module is imperfect and generates some false positives.  Conditioning only on the most recent observation makes it impossible to filter such false positives out.
+\item Velocity estimate, while helpful, are also inaccurate and noisy, and cannot be improved using only the most recent observation.
+\end{enumerate}
 
-Long-short term memory \cite{hochreiter1997long} is a de-facto standard way of dealing with time depdendent output and partial observability when NNs are applied to decision making \cite{schmidhuber2015deep}. The LSTM is a type of Recurrent Neural Network (RNN) i.e., a neural network that can process time dependent inputs. In contrast with vanilla versions of RNNs however and LSTM is robust to unstable gradient phenomena often encountered during training of deep networks. In our architecture we use LSTMs to deal with the time dependent nature of the problem and achieve robustness in the face of uncertain detections.
-
-
+These problems can be avoided by using \emph{recurrent neural networks} (RNNs), which implicitly allow the network to condition on its entire history of inputs.  \emph{Long short-term memory} \cite{hochreiter1997long} is a de facto standard way of implementing recurrence in NNs. Unlike simpler RNNs, LSTMs are robust to unstable gradient phenomena often encountered during training of deep networks. Our architecture uses LSTMs to deal with the time-dependent nature of the problem and achieve robustness in the face of uncertain detections.
 
 \subsection{Outputs and Overall Architecture}
 After processing by the recurrent layers the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. Another solution would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits allowing us to predict multimodal output distributions, we chose regression for two reasons. First, there is no requirement to define the discretisation for each task allowing the architecture to remain more general, second continuous outputs bring about potentialy smoother behaviour. In order to train our network we use the mean squared error (MSE) between the network's prediction and the data and train using backprogapation using the Adam \cite{kingma2014adam} optimisation routine. The resulting architecture can be seen in Figure []. We employ three convolutional layers consisting of 10 3x3 filters at each layer. We use ReLU non-linearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 200 and 100 respectively. Finally a densely connected layer is used to output the two required control values. 
