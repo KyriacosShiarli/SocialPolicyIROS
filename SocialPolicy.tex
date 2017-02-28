@@ -220,18 +220,15 @@ recurrent neural networks to deal with noisy perceptual input.
 %\end{equation}
 An important characteristic of our observation vector $o_t$ is that its length depends on
  the number of people around the robot, which varies over time.  This is problematic for many
-learning algorithms, which expect a fixed-length input vector. One way to alleviate this problem would be to fix $K$ to some reasonable constant. If the number of people in the data is more than $K$, only the $K$ closest are kept. If the number is smaller than $K$, then only the first $K$ positions of the vector are filled and the rest set to zeros. In this case however we are suggesting to the algorithm that there is a person on the robot since $\rho,\theta = (0,0)$. This could have adverse effects on learning, we could thus add another binary feature to our observation vector, to indicate wether the detection is a valid one. The new observation vector would thus look something like:
-
+learning algorithms, which expect a fixed-length input vector. One way to alleviate this problem would be to fix $K$ to some reasonable constant. If the number of people in the data is more than $K$, only the $K$ closest are kept. If the number is smaller than $K$, then only the first $K$ positions of the vector are filled and the rest set to zeros. However, this implies that one or more people are in the same location as the robot, since $\rho,\theta = (0,0)$, which could mislead the learning algorithm.  Another option would be to add a binary feature to our observation vector to indicate whether the detection is a valid one, yielding, e.g.:
 \begin{equation}
  	o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1,1),... (\rho_{K_t},\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0,0)\}_t
 \end{equation}
-Although perhaps inconvienient the above notation would give the learning algorithm all the information to learn a mapping. 
+While this representation accurately describes the observation, it is not convenient for learning.  Forcing the algorithm to learn to ignore observations about people whose last bit is zero is an unnecessary additional complication.  In addition, the representation ignores crucial symmetries, e.g., rearranging the order of the people in the vector yields a completely different input that describes exactly the same state.
 
-A more convienient representation however would be to imprint the observation on an image. This would involve fixing a maximum distance $x_{max},y_{max}$ from the robot and subsecuently painting all the people around the robot within that area on a ternary image. That is an image of three possible values, $0=$ no person is present, $1=$ a person is present, $2=$ a primary interaction target is present. We also denote the velocities of people as lines extending from the detections in the direction of the detected velocity and with a length that is representative of its magnitude. An example of such an image is shown in Figure \ref{fig:state}. Another convienient aspect of this representation is that our image can contain further information such as for example the nearest non-human obstacles and the orientation of the people if this can be reliably detected. 
+To avoid these difficulties, we instead imprint the information in the observation onto a 2D image. In particular, we fix a maximum distance $x_{max},y_{max}$ from the robot and `paint' all the people around the robot within that area on a ternary image, i.e., each pixel can have one of three values: $0=$ no person is present, $1=$ a person is present, $2=$ if a primary interaction target is present. We also denote the velocities of people as lines extending from the detections in the direction of the detected velocity and with a length correspomnding to its magnitude. Figure \ref{fig:state} shows an example of such an image.  It is straightforward to augment this representation with, e.g., people's orientations or the positions of non-human obstacles, should they be detectable.
 
-Although more convienient however this representation comes with a clear setback, which is that we are increasing the dimensionality of the problem. Usually when learning we seek to reduce the dimensionality of the problem through feature engineering, here we are in a sense doing the opposite. 
-
-To alleviate this setback we use convolutional neural networks (CNN) on this input representation. CNNs perform very well on spacially structured input such as the one at hand where although the actual dimentionality of the input is large, the possible images that can take place are limited and their features can be learned. CNNs are also very useful because they are able to build invariances. This is extremely helpful in this application because the network can learn to ignore some configurations of the input making learning more robust. Our analysis in the next section we show that in practice this representation along with CNNs is not only more convienient but also beneficial to learning and stability of the resulting behaviour.
+A potential downside of this approach, however, is a great increase in the dimensionality of our representation.  Fortunately, thanks to deep learning, it is feasible to cope with this dimensionality.  In particular, by applying \emph{convolutional neural networks} (CNNs) to this input representation, we can automatically extract high-level features from the raw pixel data in the image. CNNs perform very well on spatially structured input such images.  Although the  dimensionality of the input is large, the number of possible images is limited. CNNs are also  useful because they can build invariances. \sw{What is meant by invariances here?} This is extremely helpful in this application because the network can learn to ignore some configurations of the input, making learning more robust. \sw{Like what? This is too vague} Our results in the next section we show that in practice this representation together with CNNs is not only more convenient, but also improves learning and the stability of the resulting behaviour.
 
   	\begin{figure}[tbh]
   	\centering
@@ -248,24 +245,22 @@ To alleviate this setback we use convolutional neural networks (CNN) on this inp
        \label{fig:state3}
   \end{subfigure}
   %\vspace{-3mm}
-  \caption{Example images representing the state of the robot. Circles denote people, lines denote velocity. The white circle represents the primary interaction target.}
+  \caption{Example images representing the state of the robot. Circles denote people, lines denote velocity, and the white circle represents the primary interaction target.}
 
     \vspace{-2mm}
   \label{fig:state}
   \end{figure}
 
-\subsection{Dynamics and long short term memory}
-Using a single observation as input to a convolutional neural network that outputs a control is unlikely to succesful for three main reasons.
+\subsection{Dynamics and Long Short-Term Memory}
+Using a single observation as input to a convolutional neural network that outputs a control signal is problematic for three reasons:
 
-\begin{itemize}
-\item A single observation instance $o_t$ does not contain higher order information such a the acceleration of people.
-\item The people detection module is not perfect. False positives and negatives are common within the data, not having context information from previous observations will affect robustness of the controller.
-\item The velocity information (albeit helpful) is innacurate and noisy.
-\end{itemize}
+\begin{enumerate}
+\item A single observation instance $o_t$ does not contain higher order information such as people's rate of  acceleration.
+\item The people detection module is imperfect and generates some false positives.  Conditioning only on the most recent observation makes it impossible to filter such false positives out.
+\item Velocity estimate, while helpful, are also inaccurate and noisy, and cannot be improved using only the most recent observation.
+\end{enumerate}
 
-Long-short term memory \cite{hochreiter1997long} is a de-facto standard way of dealing with time depdendent output and partial observability when NNs are applied to decision making \cite{schmidhuber2015deep}. The LSTM is a type of Recurrent Neural Network (RNN) i.e., a neural network that can process time dependent inputs. In contrast with vanilla versions of RNNs however and LSTM is robust to unstable gradient phenomena often encountered during training of deep networks. In our architecture we use LSTMs to deal with the time dependent nature of the problem and achieve robustness in the face of uncertain detections.
-
-
+These problems can be avoided by using \emph{recurrent neural networks} (RNNs), which implicitly allow the network to condition on its entire history of inputs.  \emph{Long short-term memory} \cite{hochreiter1997long} is a de facto standard way of implementing recurrence in NNs. Unlike simpler RNNs, LSTMs are robust to unstable gradient phenomena often encountered during training of deep networks. Our architecture uses LSTMs to deal with the time-dependent nature of the problem and achieve robustness in the face of uncertain detections.
 
 \subsection{Outputs and Overall Architecture}
 After processing by the recurrent layers the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. Another solution would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits allowing us to predict multimodal output distributions, we chose regression for two reasons. First, there is no requirement to define the discretisation for each task allowing the architecture to remain more general, second continuous outputs bring about potentialy smoother behaviour. In order to train our network we use the mean squared error (MSE) between the network's prediction and the data and train using backprogapation using the Adam \cite{kingma2014adam} optimisation routine. The resulting architecture can be seen in Figure []. We employ three convolutional layers consisting of 10 3x3 filters at each layer. We use ReLU non-linearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 200 and 100 respectively. Finally a densely connected layer is used to output the two required control values. 
