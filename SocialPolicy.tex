@@ -208,7 +208,8 @@ During these interactions, we recorded the positions and linear velocities of al
 
 DBSoC uses behavioural cloning with \emph{neural networks} (NNs).  Using NNs has two key advantages in this setting.  First, given the need for a generic algorithm that can tackle multiple tasks, NNs can learn features, e.g., that can detect if someone is part of a group, that can be reused across related tasks.  Second, NNs are modular, allowing us to swap in different modules depending on the high-level application. For example, we describe below how we use
 recurrent neural networks to deal with noisy perceptual input.
-
+
+
 %Finally, we are in this case outputing two values ($v,\omega$) and common supervised learning algorithms would treat each output independantly. This is ofcourse possible with methods other than neural networks, such as Gaussian Mixture Models (GMMs) or Hidden Markov Models (HMM), which would however require feature engineering to perform well.  
 
 \subsection{Inputs and Convolutional Layers \label{subsec:meth_inp}}
