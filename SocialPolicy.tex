@@ -28,6 +28,7 @@
 \DeclareMathOperator*{\argmax}{\arg\!\max} 
 \usepackage[normalem]{ulem}
 \useunder{\uline}{\ul}{}
+\usepackage{url}
 
 % \title{\LARGE \bf
 % Rapidly Exploring Learning Trees
@@ -93,7 +94,7 @@ Because socially acceptable behaviour is difficult to describe procedurally, it 
 
 %One challenge that arises in social environments is that of personalisation. For example the social distance and pose that a robot should maintain when facing a group of people might vary from place to place \cite{joosse2014cultural}. This means that the robot's designer's should design the robot such that parameters can be changed. Additionally, social behaviors might be hard to program manually, for example how a robot should approach a group of people is still the subject of ongoing research \cite{vroon2015dynamics}. Finally, it would be favourable if non-roboticists could program different robot behaviours as they please without a technical expert. 
 
-A compelling alternative is \emph{learning from demonstration} (LfD), wherein control policies are inferred from example demonstrations of correct behaviour.  Because demonstrating socially appropriate behaviour is typically straightforward for humans, obtaining the data needed to learn social intelligence from demonstration is highly feasible. An additional important benefit of LfD is that many behaviors can be learned with the same algorithm. This in turn allows non-roboticists to program personalised robotic behaviours simply by demonstrating the task, an idea already exploited in industry with robots such as Baxter \footnote{www.rethinkrobotics.com} 
+A compelling alternative is \emph{learning from demonstration} (LfD), wherein control policies are inferred from example demonstrations of correct behaviour.  Because demonstrating socially appropriate behaviour is typically straightforward for humans, obtaining the data needed to learn social intelligence from demonstration is highly feasible. In addition, many different behaviours can be learned with the same LfD algorithm, allowing non-roboticists to program personalised robotic behaviours simply by demonstrating the task.%, an idea already exploited in industry with robots such as Baxter \footnote{www.rethinkrobotics.com} 
 
 % is a powerful tool. Instead of programming behaviours manually LfD, employes human demonstrations along with learning algorithms, whose aim is to extract the program from the data. This means that complex social behaviours that would require carefuly crafted programs can be learned from demonstrations. More importantly, if the learning algorithms are sufficiently generic, they can be used to learn a variety of tasks for a specific application. This in turn means that demonstrations no longer need to be coming from a roboticist, but from anyone that is capable on controlling the robot. 
 
@@ -101,17 +102,17 @@ However, to be practical for real robots, LfD must overcome some challenges of i
 
 A second challenge is to cope with the dynamic size of the perceptual input.  A robot that interacts with a group of people must be able to cope with groups of different sizes, and even people coming and going within a single conversation.  This is a poor match for most LfD methods, which assume observations in the form of fixed-length feature vectors.
 
-Finally in order to learn a variety of tasks, the learning algorithms used must be sufficiently generic. If for example we are learning low level behaviors for a mobile robot, we should be able to learn a wide set of behavious with a single learning algorithm, only by varying the data. Failure to do so would mean that each behaviour would require us to program a different learning procedure which would take away much of the benefit of LfD. 
+Third, in order to be useful for non-experts, the LfD algorithm must be sufficiently generic. In other words, it should be able to learn a wide set of behaviours with a single algorithm, by varying only the data. 
 
 %To achieve this however, LfD would needs to surpass a few challenges of its own. Firstly as mentioned above, the learning algorithms need to be sufficiently generic. If for example we are learning low level behaviors for a mobile robot, we should be able to learn a wide set of behavious with a single learning algorithm, only by varying the data. Failure to do so would mean that each behaviour would require us to program a different learning procedure which would take away much of the benefit of LfD. 
 
 %Another challenge that is especially relevant in social robotics is the robustness of the robot's perception, due to the highly unstructured nature of the environment and limitations in the sensors. Noisy perception can greatly confuse LfD methods if those are not designed to be robust to it. As an example consider a social robot that is supposed to follow a person in a relatively crowded space. The robot must maintain the belief about the identity of the person it is following, furthermore it should be robust to false positive people detections within the environment. Failure to do so would result in the robot 'misunderstaning' what the demonstrations wanted to show.
 
-In this paper, we propose \emph{deep behavioural social cloning} (DBSoC), a new LfD learning architecture that overcomes these challenges.  \emph{Behavioural cloning} is an approach to LfD in which a control policy is directly inferred using supervised learning, i.e., the demonstrated actions are treated as labels for the corresponding observations, and a mapping from observations to actions is learned.  By leveraging the power of deep learning, DBSoC makes behavioural cloning practical for social robotics.  In particular, DBSoC ``paints'' the output of the robot's person detection and localisation system onto a 2D ``image", which is then fed to a convolutional neural network.  In this way, DBSoC can cope elegantly with varying numbers of people, as well as automatically discover useful features for selecting actions.  In addition, DBSoC employs \emph{long short-term memory} (LSTM) network layers, allowing it to condition action selection on its history of observations and thus filter out transient perceptual errors.
+In this paper, we propose \emph{deep behavioural social cloning} (DBSoC), a new LfD architecture that overcomes these challenges.  \emph{Behavioural cloning} is an approach to LfD in which a control policy is directly inferred using supervised learning, i.e., the demonstrated actions are treated as labels for the corresponding observations, and a mapping from observations to actions is learned.  By leveraging the power of deep learning, DBSoC makes behavioural cloning practical for social robotics.  In particular, DBSoC `paints' the output of the robot's person detection and localisation system onto a 2D `image', which is then fed to a convolutional neural network.  In this way, DBSoC can cope elegantly with varying numbers of people, as well as automatically discover useful features for selecting actions.  In addition, DBSoC employs \emph{long short-term memory} (LSTM) network layers, allowing it to condition action selection on its history of observations and thus filter out transient perceptual errors.
 
 %Recent advancements in Deep Learning allow computers and robots to perform many learning tasks with a single neural network architecture [atari],[sensimotor]. In addition certain methods within the field have shown robustness to noisy time-dependent inputs allowing the machine to learn many aspects of the environment that previous methods would assume a hand coded model for. For example the system might learn to ignore sensor readings or detections with certain characteristics if that is found to degrade the performance of the system.
 
-We apply DBSoC to learn two social behaviours for a semi-autonomous holonomic telepresence robot. In the first task, the robot must continually adjust its position, orientation, and body pose while interacting with a group of people of dynamic size and position.  In the second task, the robot must follow two people as their relative positions change.
+We apply DBSoC to learn two social behaviours for a semi-autonomous holonomic telepresence robot. In the first task, the robot must continually adjust its position and orientation while interacting with a group of people of dynamic size and position.  In the second task, the robot must follow two people as their relative positions change.
 
 We evaluated DBSoC on these two tasks by deploying the learned policies on a real telepresence robot and having it interact with actual human subjects.  Our quantitative and qualitative results show that DBC outperforms both a naive controller and a \emph{gradient boosting regression} baseline.  Furthermore, ablation experiments confirm that each element of DBC is essential to its success.
 
@@ -123,9 +124,9 @@ In this paper, we consider two social tasks for a telepresence robot.  Such a ro
 
 \subsection{Group Reconfiguration Task} 
 
-In the first task, the robot must maintain a socially appropriate position, orientation, and body pose \sw{we need to say what body poses are, and more specially describe all the actuation available to the robot}, \ks{Apart from position and orientation there is no other body pose or actuation here} as the location, position, and size of the group with which the pilot is interacting changes.  To do so, the robot must distinguish between people who are in the scene but not part of the conversation. Though this task, shown diagrammatically in Figure \ref{fig:static}, looks deceptively simple, manually coding such behaviour, or even deciding on what features such behaviour should condition, is quite difficult in practice, making it an ideal application for LfD.
+In the first task, the robot must maintain a socially appropriate position and orientation as the location, position, and size of the group with which the pilot is interacting changes.  To do so, the robot must distinguish people who part of the conversation from those who are merely in the scene. Though this task, shown diagrammatically in Figure \ref{fig:static}, looks deceptively simple, manually coding such behaviour, or even deciding on what features such behaviour should condition, is quite difficult in practice, making it an ideal application for LfD.
 
-Previous work as considered what effect robot repositioning following a change in a conversation group's size and shape has on the people in that group \cite{kuzuoka2010reconfiguring,vroon2015dynamics}. Here, we consider how to automate such repositioning using LfD.  Other work considers how to detect groups of people in crowded environments \cite{lau2010multi} and then interact with them.  In our approach, groups are not explicitly detected, though the learned control policy may implicitly do so when deciding how to act.
+Previous work has considered what effect robot repositioning following a change in a conversation group's size and shape has on the people in that group \cite{kuzuoka2010reconfiguring,vroon2015dynamics}. Here, we consider how to automate such repositioning using LfD.  Other work considers how to detect groups of people in crowded environments \cite{lau2010multi} and then interact with them.  In our approach, groups are not explicitly detected, though the learned control policy may implicitly do so when deciding how to act.
 
 	\begin{figure}[tbh]
 %	\hspace{-5cm}
@@ -153,53 +154,64 @@ Previous work as considered what effect robot repositioning following a change i
 
 \subsection{Following Task} 
 
-Here the interaction target(s) are moving and the robot should follow them. The robot should be able to deal with relative variability in the formation of the people it is following. Furthermore it should be robust to false positive detections and be able to retain a following behaviour despite other people that are detected during the task but not relevant to it. This task is shown diagrammatically in Figure \ref{fig:follow}. Following behaviors can be challenging as the sensors might suffer from reliability issues as velocities increase \cite{kobilarov2006people}.
+In the second task, the interaction target(s) are moving and the robot should follow them. The robot should be able to deal with variability in the formation of the people it is following. Furthermore, it should be robust to false positive detections and be able to retain a following behaviour despite detecting other people who are in the scene but not relevant to the task. This task is shown diagrammatically in Figure \ref{fig:follow}. Following behaviours can be challenging because the robot's sensors often suffer from reliability issues as velocities increase \cite{kobilarov2006people}.
 
-Our second task of having the robot robustly follow people has also been popular among robotisists. A recent method described in \cite{ferrer2016robot} uses an extended social force model enriched with a goal prediction module in order to allow to walk side by side with a person. Furthermore, the system tests different social forces parameters and allows the user to give feedback about the experience. Based on this feedback the robot learns to adapt itself to the specific person.  Our work investigates the possibility of bypassing such models and simply learn the required behavior robustly through data.  
+Previous work used an extended social force model enriched with a goal prediction module to allow a robot to walk side by side with a person \cite{ferrer2016robot}. The system tests different social forces parameters and allows the user to give feedback about the experience. Based on this feedback, the robot learns to adapt itself to the specific person.  Our work investigates the possibility of bypassing such models and simply learning the required behaviour robustly through data.  
 
-Knox et al \cite{knox2013training} train a robot to perform several tasks that are similar to ours, such as maintaining a conversational distance and "magnetic control". However training is done using human generated reward and reinforcement learning through the TAMER framework \cite{knox2009interactively}. Furthermore, the tasks only consider a single person in the scene and perfect sensing, our work contains no such assumptions.
+Knox et al \cite{knox2013training} train a robot to perform several tasks that are similar to ours, such as maintaining a conversational distance and "magnetic control". However, training is done using human generated reward and reinforcement learning through the TAMER framework \cite{knox2009interactively}. Furthermore, in contrast to our work, their approach can handle only a single interaction target and assumes perfect sensing.
 
-It is interesting to note that in terms of social robot behavior LfD is mostly used for learning high level behaviours \cite{louie2016learning} \cite{lockerd2004tutelage}. Our work fills this gap, by learning low level control of a social robot from demonstrations. LfD seems to be instead most commonly used for complex manipulation tasks \cite{argall2009survey} where the field is indeed very active. Moreover, deep learning has been used in an end-to-end fashion to perform BC in self-driving cars []. Our work does not perform end to end learning for several reasons. Firstly, people detection modules are typically common to several robot functions such as navigation. Secondly learning end-to-end would require vast amounts of data as well as processing being offloaded to another machine. In contrast we only require a modest amount of data ($\approx 1hr$) and perform all processing on the robot. Finally the RGBD field of view of our robot is quite limited. People detection relies instead on a sensor fusion pipline that uses both the RGBD camera and the laser rangefinders of the robot to enable $360^o$ tracking.  
+More generally, in social robotics settings, LfD is primarily used for learning high-level behaviours \cite{louie2016learning} \cite{lockerd2004tutelage}. Our work fills this gap, by showing how to learn low-level social robot control from demonstration. Outside of social settings, LfD is most commonly used for complex manipulation tasks \cite{argall2009survey}. Deep learning has also been used in an end-to-end fashion to perform behavioural cloning in self-driving cars \sw{cite}. However, such an approach is highly intensive in terms of both data and computation.  By contrast, we rely for people detection on a sensor fusion pipeline that uses both the RGBD camera and the laser rangefinders of the robot to enable $360^\circ$ tracking.  Consequently, we require only a modest amount of data ($\approx 1hr$), perform all processing on the robot, and cope successfully with the robot's limited RGBD field of view.
+
+%Our work does not perform end to end learning for several reasons. Firstly, people detection modules are typically common to several robot functions such as navigation. Secondly learning end-to-end would require vast amounts of data as well as processing being offloaded to another machine. In contrast we only require a modest amount of data ($\approx 1hr$) and perform all processing on the robot. Finally the RGBD field of view of our robot is quite limited. People detection relies instead on a sensor fusion pipeline that uses both the RGBD camera and the laser rangefinders of the robot to enable $360^o$ tracking.  
+
+\sw{Is this section about the problem setting or related work?  It seems to have morphed from one to the other.}
 
 % Another crucial issue that we would like to address is that in many cases, even though the environment around the robot changes, there should be no change in the behavior of the robot. This \emph{invariance} is very hard to hard code. For example if we were to use a social force model to solve the tasks, the calculated forces would vary all the time based on the people position. This in turn means that the behavior of the robot could become either over or under sensitive depending on tuning. By learning these behaviors from demonstrations we hope that the robot will not only learn what to do and how to do it, but also when to do it.
 
 
 \subsection{Data and Experiments \label{subsec:data_exp}} 
 
-To collect that data required for learning we have performed one set of experiments for each of the tasks described above. Every experimental session consisted of two experimenters, one or more volunteers from the University of Amsterdam and a TERESA\footnote{www.teresaproject.eu} intelligent telepresence system, shown in Figure \ref{fig:robot}.  One experimenter would act as the pilot while the other would be on the other side of the interaction and would have two roles. The first role would be to act as an interaction target. The second would be to instruct the volunteers to join or leave the interaction and attempt to change the shape of the interaction group (triggering an appropriate reaction from the pilot) in order to capture sufficient variability in the data.  
+To collect that data required for learning, we performed one set of experiments for each of the tasks described above. Every experimental session involved two experimenters, one or more volunteers from the University of Amsterdam, and a TERESA\footnote{\url{http://www.teresaproject.eu.}} intelligent telepresence system, shown in Figure \ref{fig:robot}.  One experimenter acted as the pilot while the other acted as an interaction target and also instructed the volunteers to join or leave the interaction and attempt to change the shape of the interaction group (triggering an appropriate reaction from the pilot) in order to generate sufficient variability in the data.  
 
-During these interactions, we record the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot. The primary interaction target is defined as the most important person in the interaction and it is defined by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_,\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{\rho}_k$ and $\dot{\phi}_k$ represent the associated velocities. This is shown in Figure \ref{fig:data}. We in addition recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which amounts to the control rate we would use for the robot.  It is also worth noting that these interactions took place in different environments each containing different amounts of people and different sources of false possitives for the people detection modules.
+During these interactions, we recorded the positions and linear velocities of all people detected and tracked by the robot. We also record a binary label, indicating the primary interaction target for the robot, i.e., the most important person in the interaction as indicated by the pilot. The observation $o_t$ of $K$ people tracked at time $t$ where the first person is the primary interaction target is therefore defined as, $o_t = \{(\rho_1,\phi_1,\dot{\rho}_1,\dot{\phi}_1,1),... (\rho_,\phi_{K_t},\dot{\rho}_{K_t},\dot{\phi}_{K_t},0)\}_t$, where $\rho_k$ and $\phi_k$ are the distance and angle from the robot respectively and $\dot{\rho}_k$ and $\dot{\phi}_k$ represent the associated velocities (see Figure \ref{fig:data-pic}). We also recorded the linear and angular velocity commands given by the pilot, $a_t = (v_t,\omega_t)$, where $a_t$ denotes the action at time $t$. Recording took place at 10Hz, which is the control rate the robot uses.  Data was gathered in multiple different environments, each containing different numbers of people and different sources of false positives for people detection.
 
   	\begin{figure}[tbh]
 	\centering
       \begin{subfigure}[b]{0.35\columnwidth}
-    \includegraphics[scale = 0.19]{images/data.png}
-    \caption{}
-    \label{fig:data}
-  \end{subfigure}
-  \hspace{10mm}
-  \begin{subfigure}[b]{0.35\columnwidth}
-  \hspace{4mm}
-    \includegraphics[scale = 0.13]{images/robot.jpg}
+          \includegraphics[scale = 0.15]{images/robot2.jpg}
 
     \caption{}
-       \label{fig:robot}
+    \label{fig:robot}
+  \end{subfigure}
+%  \hspace{2mm}
+  \begin{subfigure}[b]{0.35\columnwidth}
+%  \hspace{2mm}
+
+    \includegraphics[scale = 0.19]{images/data.png}
+  \vspace{5mm}
+    \caption{}
+       \label{fig:data-pic}
   \end{subfigure} 
-  %\vspace{-3mm}
-  \caption{(a) The data collected during a frame $(t)$ during our experiments.  (b) The TERESA robot. A telepresence robot with advanced sensing equipment was used to collect data in our experiments.}
+
+  \caption{(a) The TERESA telepresence robot used in our experiments; (b) the data collected for a single frame $(t)$ during our experiments.}
 
     \vspace{-2mm}
   \label{fig:data_robot}
   \end{figure}
 
 \section{Method}
-In the previous sections we described the social tasks we will attempt to learn by demonstration. We have also described the data collection procedure that would allow us to do so. In this section we describe the learning architecture used to learn a mapping from robot observations to actions from this data. To derive this architecture we look closely into the data collected and the tasks at hand.
-First we explain the type of learning we will perform namely, behavioral cloning, and argue that neural networks are an appropriate means of executing this learning procedure. We then build our network piece by piece by looking at different aspects of the data such as possible input representations, temporal aspects and the output mappings. 
+ In this section, we describe deep behavioural social cloning (DBSoC), the learning architecture used to learn a mapping from robot observations to actions for the tasks describe above.  We first describe our behavioural cloning approach and motivate the use of neural networks in this application. We then build the network architecture piece by piece by looking at different aspects of the data such as possible input representations, temporal aspects, and output mappings. 
 
-\subsection{Behavioral Cloning}
-There are several ways perform LfD in robots that have been studied extensively in the literature. The simplest and most straightforward of these is what is usually called behavioral cloning (BC). In BC we tackle LfD from a supervised learning (SL) perspective by treating the (sequences of) observations as input states $s_t$ and actions $a_t$ as labels, to train a \emph{policy} $\pi(s_t,a_t)$ so that similar actions are performed in similar situations. In this view any supervised learning paradigm (regression, classification) and algorithm (decision trees, gaussian processes, neural networks) \cite{bishop2006pattern} can be used to learn this policy from the data. Other forms of LfD exist, namely Inverse Reinforcement Learning \cite{abbeel2004apprenticeship} which attempts to extract a cost function from the demonstrations that is subsequently used to plan (or learn \cite{boularias2011relative}) a policy. IRL has been shown to be more data efficient and more transferable across environments. It is however harder apply in practice. IRL is certainly an interesting direction for future work however in this paper we use behavioural cloning because it is simpler and we are in possetion of enough data to perform learning.
+\subsection{Behavioural Cloning}
 
-Our choice of algorithm for learning the mapping function in this case is a Neural Network for two reasons. The first of these is \emph{generality}. In these paper our aim is to learn two (and potentially more) behaviours using a single algortithm. NNs can learn the features that are important for prediction automatically and this in turn means there would be therefore no need to define problem-specific features for a task, such as for example a group detection module. The second reason to use NNs is \emph{modularity}. This means that we can use different computation modules depending on our high level application. For example through recurrent neural networks we can easily deal with observations that vary (non linearly) over time in order to alleviate problems arising from noise in detections. Also in our input representation we have continuous as well as discrete variables, neural networks can deal with such representations easily. Finally, we are in this case outputing two values ($v,\omega$) and common supervised learning algorithms would treat each output independantly. This is ofcourse possible with methods other than neural networks, such as Gaussian Mixture Models (GMMs) or Hidden Markov Models (HMM), which would however require feature engineering to perform well.  
+\emph{Behavioural cloning} is a simple approach to LfD that treats the problem as one of supervised learning. The (sequences of) observations are viewed as inputs $s_t$ and actions $a_t$ as labels.  Then, any supervised learning paradigm (regression, classification) and algorithm (decision trees, gaussian processes, neural networks) \cite{bishop2006pattern} can be used to learn a mapping from $s_t$ to $a_t$, which then constitutes a control policy.  Compared to other forms of LfD such as \emph{inverse reinforcement learning} \cite{abbeel2004apprenticeship}, which extracts a cost function from the demonstrations that is subsequently used to plan (or learn \cite{boularias2011relative}) a policy, behavioural cloning is simple, practical, and does not require access to a model or the ability to try out candidate policies during learning. \sw{We need to crystallise exactly what the argument against IRL is.}
+
+DBSoC uses behavioural cloning with \emph{neural networks} (NNs).  Using NNs has two key advantages in this setting.  First, given the need for a generic algorithm that can tackle multiple tasks, NNs can learn features, e.g., that can detect if someone is part of a group, that can be reused across related tasks.  Second, NNs are modular, allowing us to swap in different modules depending on the high-level application. For example, we describe below how we use
+recurrent neural networks to deal with noisy perceptual input.
+
+%we can easily deal with observations that vary (non linearly) over time in order to alleviate problems arising from noise in detections. Also in our input representation we have continuous as well as discrete variables, neural networks can deal with such representations easily. 
+
+%Finally, we are in this case outputing two values ($v,\omega$) and common supervised learning algorithms would treat each output independantly. This is ofcourse possible with methods other than neural networks, such as Gaussian Mixture Models (GMMs) or Hidden Markov Models (HMM), which would however require feature engineering to perform well.  
 
 \subsection{Inputs and convolutional layers \label{subsec:meth_inp}}
 In the previous section we have seen that our observations at time t can be formulated as:
@@ -321,14 +333,14 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
 
     \includegraphics[scale = 0.09]{images/full_dist.png}
     \caption{DBSoC}
-    \label{fig:data}
+    \label{fig:data1}
   \end{subfigure}
     	\hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
 
     \includegraphics[scale = 0.09]{images/lstm_dist.png}
     \caption{LSTM}
-       \label{fig:robot}
+       \label{fig:data2}
   \end{subfigure} 
   \\
         \begin{subfigure}[b]{0.45\columnwidth}
@@ -341,13 +353,13 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
     \includegraphics[scale = 0.09]{images/gbr_dist.png}
 
     \caption{GBR}
-       \label{fig:robot}
+       \label{fig:data3}
   \end{subfigure} 
   %\vspace{-3mm}
   \caption{Output disributions of Follow data (red) and learned policies.}
 
     \vspace{-2mm}
-  \label{fig:data_robot}
+  \label{fig:data4}
   \end{figure}
 
 
@@ -364,7 +376,7 @@ During the course of these evaluations it became apparent how difficult it is fo
       \begin{subfigure}[b]{0.40\columnwidth}
     \includegraphics[scale = 0.30]{images/group_candle.png}
     \caption{Group Reconfiguration}
-    \label{fig:static}
+    \label{fig:static-res}
   \end{subfigure}
   \hspace{5mm}
   \begin{subfigure}[b]{0.40\columnwidth}
