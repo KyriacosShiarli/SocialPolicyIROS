@@ -260,6 +260,17 @@ After processing by the recurrent layers the architecture then outputs two real 
 A final crucial point is that prediction needs to happen at 10Hz on a conventional computer, such as the one used by our robot. The proposed architecture would run comfortably on an Intel i7 processor at the required control rate.
 
 
+  	\begin{figure}[tbh]
+	\centering
+    \includegraphics[scale = 0.22]{images/arch.png}
+    \label{fig:data}
+  %\vspace{-3mm}
+  \caption{The general DBSoC architecture. The image representing the robot state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that in turn output the required controls, $v_t$, $\omega_t$. }
+
+    \vspace{-2mm}
+  \label{fig:data_robot}
+  \end{figure}
+
 % \subsection{Continuous Learning Pipeline}
 % One major setback of behavioural cloning that has been studied in the literature, is that since most demonstrations are noisy examples of what the robot should do, the robot never learns how to get out of difficult situations when it finds itself in one, because it was never encountered in the data. For this reason we take a similar approach to the one encountered in []. First we collect some data using the robot, perform learning and deploy the learned policy on the robot. During execution we correct the robot whenever it makes a mistake, record the data from the intervention and then hand the control back to the robot.
 
