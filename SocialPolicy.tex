@@ -265,33 +265,37 @@ Using a single observation as input to a convolutional neural network that outpu
 These problems can be avoided by using \emph{recurrent neural networks} (RNNs), which implicitly allow the network to condition on its entire history of inputs.  \emph{Long short-term memory} \cite{hochreiter1997long} is a de facto standard way of implementing recurrence in NNs. Unlike simpler RNNs, LSTMs are robust to unstable gradient phenomena often encountered during training of deep networks. Our architecture uses LSTMs to deal with the time-dependent nature of the problem and achieve robustness in the face of uncertain detections.
 
 \subsection{Outputs and Overall Architecture}
-After processing by the recurrent layers the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. Another solution would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits allowing us to predict multimodal output distributions, we chose regression for two reasons. First, there is no requirement to define the discretisation for each task allowing the architecture to remain more general, second continuous outputs bring about potentialy smoother behaviour. In order to train our network we use the mean squared error (MSE) between the network's prediction and the data and train using backprogapation using the Adam \cite{kingma2014adam} optimisation routine. The resulting architecture can be seen in Figure []. We employ three convolutional layers consisting of 10 3x3 filters at each layer. We use ReLU non-linearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 200 and 100 respectively. Finally a densely connected layer is used to output the two required control values. 
- 
-A final crucial point is that prediction needs to happen at 10Hz on a conventional computer, such as the one used by our robot. The proposed architecture would run comfortably on an Intel i7 processor at the required control rate.
+After processing by the recurrent layers, the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. An alternative would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits, e.g. allowing multimodal output distributions, we chose regression for two reasons. First, since the right discretisation is problem specific, a regression approach is more general. Second, continuous outputs can generate smoother behaviour. 
+
+To train our network, we use backprogapation with the Adam \cite{kingma2014adam} optimisation routine to minimise the \emph{mean squared error} (MSE) between the network's prediction and the data. 
+
+Figure \ref{fig:arch} shows the complete resulting architecture. We employ three convolutional layers consisting of 10 $3 \times 3$ filters at each layer. We use ReLU nonlinearities followed by a subsampling step using max-pooling of size 2. The output from the last convolutional layer is flattened and processed through two LSTM layers of size 200 and 100 respectively. Finally, a densely connected layer is used to output the two required control values. 
+
+Because the robot selects action s at 10Hz, the trained network must be able to forward propagate at that rate.  We found that our network could do so comfortably on an Intel i7 processor.
 
 
   	\begin{figure}[tbh]
 	\centering
     \includegraphics[scale = 0.22]{images/arch.png}
-    \label{fig:data}
   %\vspace{-3mm}
-  \caption{The general DBSoC architecture. The image representing the robot state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that in turn output the required controls, $v_t$, $\omega_t$. }
+  \caption{The complete DBSoC architecture. The image representing the state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that output the control signals $(v_{pred},\omega_{pred})$. }
 
     \vspace{-2mm}
-  \label{fig:data_robot}
+  \label{fig:arch}
   \end{figure}
 
 % \subsection{Continuous Learning Pipeline}
 % One major setback of behavioural cloning that has been studied in the literature, is that since most demonstrations are noisy examples of what the robot should do, the robot never learns how to get out of difficult situations when it finds itself in one, because it was never encountered in the data. For this reason we take a similar approach to the one encountered in []. First we collect some data using the robot, perform learning and deploy the learned policy on the robot. During execution we correct the robot whenever it makes a mistake, record the data from the intervention and then hand the control back to the robot.
 
 
-\section{Evaluation and results}
-In order to evaluate our proposed architecture we will compare it against three other learning baselines. The first of these is an off-the-shelf regression method. In this case due to the mixed types in the inputs we will use Gradient Boosting Regression (GBR), which along with other ensemble methods is considered one of the best off the shelf algorithms for non-linear regression. We use this baseline to show that for traditional regression methods to work well task specific feature engineering would need to be performed. Input to this baseline are the concatenated observation vectors for K people around the robot (as described in the begining of Section \ref{subsec:meth_inp}) for T timesteps. In this case K=4 and T =5 so theinput vector representations is $K\times T \times 6 = 120$. We did not use T=20 as in our method since the explosion in input space caused a degradation in performance. The second baseline we use is an architecture that omits the convolutional layers and only employs the LSTM layers. The input representation is a vector concatenating the features of K people around the robot where K in this case is set to 4. Our third baseline is an architecture with no memory and only uses the convolutional layers.
+\section{Evaluation and Results}
+We evaluate DBSoC by comparing it against three other learning baselines. The first is an off-the-shelf regression method. Due to the mixed types in the inputs, we use \emph{gradient boosting regression} (GBR), which  is considered one of the best off-the-shelf algorithms for nonlinear regression. We use this baseline to show that, for traditional regression methods to work well, task-specific feature engineering would need to be performed. Inputs to this baseline are the concatenated observation vectors for $K$ people around the robot (as described in Section \ref{subsec:meth_inp}) for $T$ timesteps. In this case, $K=4$ and $T =5$ so the input vector representations is $K\times T \times 6 = 120$. We did not use $T=20$ as DBSoC does because the explosion in input dimensionality caused a degradation in performance. 
 
-To measure performance we are not simply concerned about how well the algorithms fit the data but also how they perform when placed on the robot and tested with humans. Therefore to evaluate we use a mixture of quantitative and qualitative metrics. 
+The second baseline a deep architecture that omits the convolutional layers and only employs the LSTM layers. The input representation is a vector concatenating the features of $K=4$ people around the robot. The third baseline is an architecture with no memory that uses only the convolutional layers.
 
-\subsection{Mean squared error}
-As mentioned in the previous section, the objective function used to learn the mapping between observations and controls is the MSE. A first measure of the performance of DBSoC and the proposed baselines is to measure the MSE for a test dataset not used during learning. In our case the test set was comprised of 20\% of the data for each task which amounts to 8543 and 5643 datapoints for the follow and group reconfiguration tasks respectively. Table \ref{tab:mse} documents the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
+When evaluating these algorithms, we are concerned not only with minimising error on the data but also how they perform when placed on the robot and tested with humans. Therefore, our evaluation relies on a mixture of quantitative and qualitative metrics. 
+\subsection{Mean Squared Error}
+Since the algorithms are trained to minimise MSE, the first performance measure we consider is MSE on both the training set and a test set not used during learning. In our case, the test set contained of 20\% of the data for each task, which amounts to 8543 and 5643 data points for the follow and group reconfiguration tasks, respectively. Table \ref{tab:mse} shows the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
 
 % \begin{table}[]
 % \centering
@@ -306,9 +310,9 @@ As mentioned in the previous section, the objective function used to learn the m
 
 % \end{table}
 
-\begin{table}[]
+\begin{table}[h]
 \centering
-\caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.}
+
 \label{tab:mse}
 \begin{tabular}{|c|c|c|c|l|c|}
 \hline
@@ -318,11 +322,12 @@ As mentioned in the previous section, the objective function used to learn the m
 \textbf{Follow} & {\ul Train} & 0.0265    & 0.00334      & 0.0079     & \textbf{0.0030}  \\ \hline
                 & {\ul Test}  & 0.0323     & 0.00450       & 0.0250    & \textbf{0.0036}  \\ \hline
 \end{tabular}
+\caption{Train and test MSE for DBSoC and the baselines.}
 \end{table}
 
 
-\subsection{Output distribution}
-A more qualitative yet insightful means of evaluation can be achieved by examining the output distribution on the outputs of each learned policy given the inputs. That is, using a portion of the validation data we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $v_{dem},\omega_{dem}$. This gives an idea as to how the output disribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since it can give as an insight on the expected behaviour of the robot. Figures \ref{fig:data} overlays the $v_{dem},\omega_{dem}$ (blue) with $v_{pred},\omega_{pred}$ for our method and the baselines for the follow task. The most obvious observation is that GBR captures the demonstrated distribution very badly. Its behaviour is extected to not use large angular velocities (y-axis) and will thus be not very responsive. In addition there seems to be a lot of uncertainty around the origin, possibly leading to oscilatory behaviour between positive an negative velocities. The short memory architecture also seems unable to capture the distribution, we see a lot of points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
+\subsection{Output Distribution}
+A more qualitative yet insightful means of evaluation can be achieved by examining the distribution of the outputs of each learned policy, conditioned on the inputs. That is, using a portion of the validation data \sw{Is this the same as the test data?  If so, don't use two different names for it.}, we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $(v_{dem},\omega_{dem})$. This gives an indication of how the output distribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since sheds some light on the expected behaviour of the robot. Figure \ref{fig:data} overlays $(v_{dem},\omega_{dem})$ (blue) with $(v_{pred},\omega_{pred})$ for our method and the baselines for the follow task. From this figure it is obvious that GBR captures the demonstrated distribution quite poorly. Its behaviour is expected to not use large angular velocities ($y$-axis) and will thus be not very responsive. In addition, there is a lot of variance around the origin, possibly leading to oscillatory behaviour between positive an negative velocities. The LSTM baseline also seems unable to capture the distribution, as we see many points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
 
 
 
@@ -344,24 +349,24 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
         \begin{subfigure}[b]{0.45\columnwidth}
     \includegraphics[scale = 0.09]{images/short_dist.png}
     \caption{CONV}
-    \label{fig:data}
+    \label{fig:data3}
   \end{subfigure}
   \hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
     \includegraphics[scale = 0.09]{images/gbr_dist.png}
 
     \caption{GBR}
-       \label{fig:data3}
+       \label{fig:data4}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{Output disributions of Follow data (red) and learned policies.}
+  \caption{Output distributions of the follow data (red) and each of the four learned policies.}
 
     \vspace{-2mm}
-  \label{fig:data4}
+  \label{fig:data}
   \end{figure}
 
 
-\subsection{Human evaluation}
+\subsection{Human Evaluation}
 This paper is a contribution to making social robotic behaviours easier to program. The end product of such an effort must then be evaluated by humans. Also unless a policy is deployed on an actual robot there is little way of knowing how it performs. This is because while the problem is tackled from a supervised leanring perspective it is still a sequential decision making problem. This means that an action of the robot affects its environment and wrong actions at the wrong time might bring the robot to states it does not know how to recover from.
 
 Our human evaluation in this case consisted of groups of subjects from the University of Amsterdam interacting with the learned policies as well as a hard-coded controller. This hard-coded behaviour would take the person closest to the person and attempt to keep a constant distance ($\rho$) of $1.3m$, in accordance with standard proxemics [hall], and an orientation ($\phi$) of $0^o$. The subjects were first briefed about the purpose of each behaviour they were about to evaluate (i.e., follow or group conversation). Following the briefing was a calibration step where the subjects were shown human level performance in each of the tasks as well as various policies at random. This allowed the subjects to get a feel as to what they should expect from the robot. After calibration the subjects were given about 2 minutes to interact with each policy to be evaluated at each of the tasks. The policies were given anonymously and at different order each time. The subjects were then given the opportunity to rate the social performance of each policy with a number from 1 to 10, with 10 being human level performance. Examples of the interactions for different tasks and policies in such an evaluation session can be seen in the attached video.
