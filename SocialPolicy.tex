@@ -116,7 +116,7 @@ In this paper, we propose \emph{deep behavioural social cloning} (DBSoC), a new 
 
 We apply DBSoC to learn two social behaviours for a semi-autonomous holonomic telepresence robot. In the first task, the robot must continually adjust its position and orientation while interacting with a group of people of dynamic size and position.  In the second task, the robot must follow two people as their relative positions change.
 
-We evaluated DBSoC on these two tasks by deploying the learned policies on a real telepresence robot and having it interact with actual human subjects.  Our quantitative and qualitative results show that DBC outperforms both a naive controller and a \emph{gradient boosting regression} baseline.  Furthermore, ablation experiments confirm that each element of DBC is essential to its success.
+We evaluated DBSoC on these two tasks by deploying the learned policies on a real telepresence robot and having it interact with actual human subjects.  Our quantitative and qualitative results show that DBSoC outperforms both a naive controller and a \emph{gradient boosting regression} baseline.  Furthermore, ablation experiments confirm that each element of DBSoC is essential to its success.
 
 % has to do with reconfiguration of the robot when interacting with a group. Taking that is, the correct body pose in the presence of a group of people of changing size and position. The second behaviour is following two people in abitrary formation. The rest of the paper is organised as follows. Section 2 describes the behaviours we wish to learn, summarises related work in the field and describes the experiments performed to collect the required data. Section 3 explains the challenges inherent in the tasks and the collected data. Through these challenges we explain the design choices for our neural network architecture. Section 4 describes quantitative and qualitative evaluation of our system against baselines. Section 5 concludes the paper and details our plans for further work.
 
@@ -124,7 +124,7 @@ We evaluated DBSoC on these two tasks by deploying the learned policies on a rea
 
 In this paper, we consider two social tasks for a telepresence robot.  Such a robot acts as an avatar for a remotely present \emph{pilot} controlling the machine.  While telepresence robots are typically manually controlled, we aim to automate low-level control so that the pilot need only give high-level commands telling the robot, e.g., to follow a particular person or support a conversation with appropriate body poses.  Because telepresence robots are inherently social, and especially since they represent their pilots as avatars, it is essential that any learned behaviour be socially appropriate. In this section, we describe the two particular telepresence tasks considered in this paper, and the demonstration data we collected.  For both tasks, we assume the robot is equipped with an imperfect person detection and localisation system.  We also assume it is operating in an unstructured in environment containing a dynamic number of people, some of whom may not be involved in the pilot's conversation.
 
-\subsection{Group Reconfiguration Task} 
+\subsection{Group Interaction Task} 
 
 In the first task, the robot must maintain a socially appropriate position and orientation as the location, position, and size of the group with which the pilot is interacting changes.  To do so, the robot must distinguish people who part of the conversation from those who are merely in the scene. Though this task, shown diagrammatically in Figure \ref{fig:static}, looks deceptively simple, manually coding such behaviour, or even deciding on what features such behaviour should condition, is quite difficult in practice, making it an ideal application for LfD.
 
@@ -135,7 +135,7 @@ Previous work has considered what effect robot repositioning following a change 
 	\centering
       \begin{subfigure}[b]{0.39\columnwidth}
     \includegraphics[scale = 0.15]{images/static.png}
-    \caption{Group Reconfiguration}
+    \caption{Group Interaction}
     \label{fig:static}
   \end{subfigure}
   \hspace{10mm}
@@ -293,9 +293,10 @@ We evaluate DBSoC by comparing it against three other learning baselines. The fi
 
 The second baseline a deep architecture that omits the convolutional layers and only employs the LSTM layers. The input representation is a vector concatenating the features of $K=4$ people around the robot. The third baseline is an architecture with no memory that uses only the convolutional layers.
 
-When evaluating these algorithms, we are concerned not only with minimising error on the data but also how they perform when placed on the robot and tested with humans. Therefore, our evaluation relies on a mixture of quantitative and qualitative metrics. 
+When evaluating these algorithms, we are concerned not only with minimising error on the data but also how they perform when placed on the robot and tested with humans. Therefore, our evaluation relies on a mixture of quantitative and qualitative metrics. 
+
 \subsection{Mean Squared Error}
-Since the algorithms are trained to minimise MSE, the first performance measure we consider is MSE on both the training set and a test set not used during learning. In our case, the test set contained of 20\% of the data for each task, which amounts to 8543 and 5643 data points for the follow and group reconfiguration tasks, respectively. Table \ref{tab:mse} shows the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
+Since the algorithms are trained to minimise MSE, the first performance measure we consider is MSE on both the training set and a test set not used during learning. In our case, the test set contained of 20\% of the data for each task, which amounts to 8543 and 5643 data points for the follow and group interaction tasks, respectively. Table \ref{tab:mse} shows the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
 
 % \begin{table}[]
 % \centering
@@ -327,7 +328,7 @@ Since the algorithms are trained to minimise MSE, the first performance measure 
 
 
 \subsection{Output Distribution}
-A more qualitative yet insightful means of evaluation can be achieved by examining the distribution of the outputs of each learned policy, conditioned on the inputs. That is, using a portion of the validation data \sw{Is this the same as the test data?  If so, don't use two different names for it.}, we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $(v_{dem},\omega_{dem})$. This gives an indication of how the output distribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since sheds some light on the expected behaviour of the robot. Figure \ref{fig:data} overlays $(v_{dem},\omega_{dem})$ (blue) with $(v_{pred},\omega_{pred})$ for our method and the baselines for the follow task. From this figure it is obvious that GBR captures the demonstrated distribution quite poorly. Its behaviour is expected to not use large angular velocities ($y$-axis) and will thus be not very responsive. In addition, there is a lot of variance around the origin, possibly leading to oscillatory behaviour between positive an negative velocities. The LSTM baseline also seems unable to capture the distribution, as we see many points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
+A more qualitative yet insightful means of evaluation can be achieved by examining the distribution of the outputs of each learned policy, conditioned on the inputs. That is, using a portion of the validation data \sw{Is this the same as the test data?  If so, don't use two different names for it.}, we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $(v_{dem},\omega_{dem})$. This gives an indication of how the output distribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since sheds some light on the expected behaviour of the robot. Figure \ref{fig:data} overlays $(v_{dem},\omega_{dem})$ (blue) with $(v_{pred},\omega_{pred})$ for our method and the baselines for the follow task. From this figure it is obvious that GBR captures the demonstrated distribution quite poorly. Its behaviour is expected to not use large angular velocities ($y$-axis) and will thus be not very responsive. In addition, there is a lot of variance around the origin, possibly leading to oscillatory behaviour between positive an negative velocities. The CONV baseline also seems unable to capture the distribution, as we see many points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
 
 
 
@@ -378,7 +379,7 @@ During the course of these evaluations it became apparent how difficult it is fo
 	\begin{figure}[tbh]
       \begin{subfigure}[b]{0.40\columnwidth}
     \includegraphics[scale = 0.30]{images/group_candle.png}
-    \caption{Group Reconfiguration}
+    \caption{Group Interaction}
     \label{fig:static-res}
   \end{subfigure}
   \hspace{5mm}
@@ -395,6 +396,10 @@ During the course of these evaluations it became apparent how difficult it is fo
 
 
 \section{Conclusions and future work} 
+
+In this paper we introduced DBSoC a generic neural network architecture that allows learning from demonstration for social robotic tasks. Two social tasks were considered in this paper namely group interaction and following. Our architecture was able to learn both tasks well witout any programming demonstrating its generality. This was not only confirmed quantitative means but also from human evaluation sessions where the learned policies were deployed on a real telepresence robot. 
+
+In the future we will be using reinforcement and inverse reinforcement learning along with BC in order to further improve the quality as well as the range of behaviours that can be learned.   
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
