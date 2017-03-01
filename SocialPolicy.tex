@@ -265,7 +265,7 @@ Using a single observation as input to a convolutional neural network that outpu
 These problems can be avoided by using \emph{recurrent neural networks} (RNNs), which implicitly allow the network to condition on its entire history of inputs.  \emph{Long short-term memory} \cite{hochreiter1997long} is a de facto standard way of implementing recurrence in NNs. Unlike simpler RNNs, LSTMs are robust to unstable gradient phenomena often encountered during training of deep networks. Our architecture uses LSTMs to deal with the time-dependent nature of the problem and achieve robustness in the face of uncertain detections.
 
 \subsection{Outputs and Overall Architecture}
-After processing by the recurrent layers, the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. An alternative would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits, e.g. allowing multimodal output distributions, we chose regression for two reasons. First, since the right discretisation is problem specific, a regression approach is more general. Second, continuous outputs can generate smoother behaviour. 
+After processing by the recurrent layers, the architecture then outputs two real continuous values representing the linear and angular velocities ($v_t,\omega_t$) of the robot. An alternative would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits, e.g. allowing multimodal output distributions, we chose regression for two reasons. First, since the right discretisation is problem specific, a regression approach is more general. Second, continuous outputs can generate smoother behaviour. 
 
 To train our network, we use backprogapation with the Adam \cite{kingma2014adam} optimisation routine to minimise the \emph{mean squared error} (MSE) between the network's prediction and the data. 
 
@@ -278,7 +278,7 @@ Because the robot selects action s at 10Hz, the trained network must be able to 
 	\centering
     \includegraphics[scale = 0.22]{images/arch.png}
   %\vspace{-3mm}
-  \caption{The general DBSoC architecture. The image representing the robot state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that in turn output the required controls, $v_t$, $\omega_t$. }
+  \caption{The complete DBSoC architecture. The image representing the state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that output the control signals $(v_t,\omega_t)$. }
 
     \vspace{-2mm}
   \label{fig:arch}
