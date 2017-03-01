@@ -288,14 +288,13 @@ Because the robot selects action s at 10Hz, the trained network must be able to 
 % One major setback of behavioural cloning that has been studied in the literature, is that since most demonstrations are noisy examples of what the robot should do, the robot never learns how to get out of difficult situations when it finds itself in one, because it was never encountered in the data. For this reason we take a similar approach to the one encountered in []. First we collect some data using the robot, perform learning and deploy the learned policy on the robot. During execution we correct the robot whenever it makes a mistake, record the data from the intervention and then hand the control back to the robot.
 
 
-\section{Evaluation and results}
+\section{Evaluation and Results}
 We evaluate DBSoC by comparing it against three other learning baselines. The first is an off-the-shelf regression method. Due to the mixed types in the inputs, we use \emph{gradient boosting regression} (GBR), which  is considered one of the best off-the-shelf algorithms for nonlinear regression. We use this baseline to show that, for traditional regression methods to work well, task-specific feature engineering would need to be performed. Inputs to this baseline are the concatenated observation vectors for $K$ people around the robot (as described in Section \ref{subsec:meth_inp}) for $T$ timesteps. In this case, $K=4$ and $T =5$ so the input vector representations is $K\times T \times 6 = 120$. We did not use $T=20$ as DBSoC does because the explosion in input dimensionality caused a degradation in performance. 
 
 The second baseline a deep architecture that omits the convolutional layers and only employs the LSTM layers. The input representation is a vector concatenating the features of $K=4$ people around the robot. The third baseline is an architecture with no memory that uses only the convolutional layers.
 
-To measure performance we are not simply concerned about how well the algorithms fit the data but also how they perform when placed on the robot and tested with humans. Therefore to evaluate we use a mixture of quantitative and qualitative metrics. 
-
-\subsection{Mean squared error}
+When evaluating these algorithms, we are concerned not only with minimising error on the data but also how they perform when placed on the robot and tested with humans. Therefore, our evaluation relies on a mixture of quantitative and qualitative metrics. 
+\subsection{Mean Squared Error}
 As mentioned in the previous section, the objective function used to learn the mapping between observations and controls is the MSE. A first measure of the performance of DBSoC and the proposed baselines is to measure the MSE for a test dataset not used during learning. In our case the test set was comprised of 20\% of the data for each task which amounts to 8543 and 5643 datapoints for the follow and group reconfiguration tasks respectively. Table \ref{tab:mse} documents the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
 
 % \begin{table}[]
