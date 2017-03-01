@@ -295,7 +295,7 @@ The second baseline a deep architecture that omits the convolutional layers and 
 
 When evaluating these algorithms, we are concerned not only with minimising error on the data but also how they perform when placed on the robot and tested with humans. Therefore, our evaluation relies on a mixture of quantitative and qualitative metrics. 
 \subsection{Mean Squared Error}
-As mentioned in the previous section, the objective function used to learn the mapping between observations and controls is the MSE. A first measure of the performance of DBSoC and the proposed baselines is to measure the MSE for a test dataset not used during learning. In our case the test set was comprised of 20\% of the data for each task which amounts to 8543 and 5643 datapoints for the follow and group reconfiguration tasks respectively. Table \ref{tab:mse} documents the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
+Since the algorithms are trained to minimise MSE, the first performance measure we consider is MSE on both the training set and a test set not used during learning. In our case, the test set contained of 20\% of the data for each task, which amounts to 8543 and 5643 data points for the follow and group reconfiguration tasks, respectively. Table \ref{tab:mse} shows the performance of each method on both the training and test sets. We can see that DBSoC outperforms all baselines on the test set, followed by the LSTM method, (where no image representation is used). GBR is the worse performer by a significant margin.
 
 % \begin{table}[]
 % \centering
@@ -312,7 +312,7 @@ As mentioned in the previous section, the objective function used to learn the m
 
 \begin{table}[h]
 \centering
-\caption{Mean squared error rates for our full model and the prosposed baselines. The error is computed on 20\% of the data held out for testing purposes in each case.}
+
 \label{tab:mse}
 \begin{tabular}{|c|c|c|c|l|c|}
 \hline
@@ -322,6 +322,7 @@ As mentioned in the previous section, the objective function used to learn the m
 \textbf{Follow} & {\ul Train} & 0.0265    & 0.00334      & 0.0079     & \textbf{0.0030}  \\ \hline
                 & {\ul Test}  & 0.0323     & 0.00450       & 0.0250    & \textbf{0.0036}  \\ \hline
 \end{tabular}
+\caption{Train and test MSE for DBSoC and the baselines.}
 \end{table}
 
 
