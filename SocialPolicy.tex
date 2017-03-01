@@ -265,7 +265,7 @@ Using a single observation as input to a convolutional neural network that outpu
 These problems can be avoided by using \emph{recurrent neural networks} (RNNs), which implicitly allow the network to condition on its entire history of inputs.  \emph{Long short-term memory} \cite{hochreiter1997long} is a de facto standard way of implementing recurrence in NNs. Unlike simpler RNNs, LSTMs are robust to unstable gradient phenomena often encountered during training of deep networks. Our architecture uses LSTMs to deal with the time-dependent nature of the problem and achieve robustness in the face of uncertain detections.
 
 \subsection{Outputs and Overall Architecture}
-After processing by the recurrent layers, the architecture then outputs two real continuous values representing the linear and angular velocities ($v_t,\omega_t$) of the robot. An alternative would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits, e.g. allowing multimodal output distributions, we chose regression for two reasons. First, since the right discretisation is problem specific, a regression approach is more general. Second, continuous outputs can generate smoother behaviour. 
+After processing by the recurrent layers, the architecture then outputs two real continuous values representing the linear and angular velocities ($v_{pred},\omega_{pred}$) of the robot. An alternative would be to discretise the outputs and treat the prediction as a classification problem. While doing so has some benefits, e.g. allowing multimodal output distributions, we chose regression for two reasons. First, since the right discretisation is problem specific, a regression approach is more general. Second, continuous outputs can generate smoother behaviour. 
 
 To train our network, we use backprogapation with the Adam \cite{kingma2014adam} optimisation routine to minimise the \emph{mean squared error} (MSE) between the network's prediction and the data. 
 
@@ -278,7 +278,7 @@ Because the robot selects action s at 10Hz, the trained network must be able to 
 	\centering
     \includegraphics[scale = 0.22]{images/arch.png}
   %\vspace{-3mm}
-  \caption{The complete DBSoC architecture. The image representing the state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that output the control signals $(v_t,\omega_t)$. }
+  \caption{The complete DBSoC architecture. The image representing the state passes through two convolution-nonlinearity-subsample layers before being fed through two LSTM layers that output the control signals $(v_{pred},\omega_{pred})$. }
 
     \vspace{-2mm}
   \label{fig:arch}
@@ -327,7 +327,7 @@ Since the algorithms are trained to minimise MSE, the first performance measure 
 
 
 \subsection{Output Distribution}
-A more qualitative yet insightful means of evaluation can be achieved by examining the output distribution on the outputs of each learned policy given the inputs. That is, using a portion of the validation data we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $v_{dem},\omega_{dem}$. This gives an idea as to how the output disribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since it can give as an insight on the expected behaviour of the robot. Figures \ref{fig:data} overlays the $v_{dem},\omega_{dem}$ (blue) with $v_{pred},\omega_{pred}$ for our method and the baselines for the follow task. The most obvious observation is that GBR captures the demonstrated distribution very badly. Its behaviour is extected to not use large angular velocities (y-axis) and will thus be not very responsive. In addition there seems to be a lot of uncertainty around the origin, possibly leading to oscilatory behaviour between positive an negative velocities. The short memory architecture also seems unable to capture the distribution, we see a lot of points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
+A more qualitative yet insightful means of evaluation can be achieved by examining the distribution of the outputs of each learned policy, conditioned on the inputs. That is, using a portion of the validation data \sw{Is this the same as the test data?  If so, don't use two different names for it.}, we plot the predicted linear and angular velocities ($v_{pred},\omega_{pred}$) and compare them with the actual values encountered in the data $(v_{dem},\omega_{dem})$. This gives an indication of how the output distribution of the predictor matches that of the human demonstrator. This can be more insightful than a single metric value since sheds some light on the expected behaviour of the robot. Figure \ref{fig:data} overlays $(v_{dem},\omega_{dem})$ (blue) with $(v_{pred},\omega_{pred})$ for our method and the baselines for the follow task. The most obvious observation is that GBR captures the demonstrated distribution very badly. Its behaviour is extected to not use large angular velocities (y-axis) and will thus be not very responsive. In addition there seems to be a lot of uncertainty around the origin, possibly leading to oscilatory behaviour between positive an negative velocities. The short memory architecture also seems unable to capture the distribution, we see a lot of points that are scattered and far away from any data point we can thus also expect relatively poor behaviour. The LSTM policy on the other hand seems to have similar capabilities to DBSoC which clearly does a very good job at matching the demonstrators outputs. 
 
 
 
@@ -349,20 +349,20 @@ A more qualitative yet insightful means of evaluation can be achieved by examini
         \begin{subfigure}[b]{0.45\columnwidth}
     \includegraphics[scale = 0.09]{images/short_dist.png}
     \caption{CONV}
-    \label{fig:data}
+    \label{fig:data3}
   \end{subfigure}
   \hspace{5mm}
   \begin{subfigure}[b]{0.45\columnwidth}
     \includegraphics[scale = 0.09]{images/gbr_dist.png}
 
     \caption{GBR}
-       \label{fig:data3}
+       \label{fig:data4}
   \end{subfigure} 
   %\vspace{-3mm}
-  \caption{Output disributions of Follow data (red) and learned policies.}
+  \caption{Output distributions of the follow data (red) and each of the four learned policies.}
 
     \vspace{-2mm}
-  \label{fig:data4}
+  \label{fig:data}
   \end{figure}
 
 
